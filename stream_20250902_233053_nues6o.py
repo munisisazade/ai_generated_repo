@@ -2010,3 +2010,130 @@ if __name__ == "__main__":
     print("Royal Flush!")
 
 # ===== module block end =====
+
+# ===== module block begin ===== 2025-09-02T23:55:14.442302Z =====
+from typing import Dict, List, Optional, Tuple, Union
+from enum import Enum
+import math
+import statistics
+from dataclasses import dataclass, field
+
+
+class B58a08bc9_CardSuit(Enum):
+    """Represents the four suits in a standard deck of cards."""
+    HEARTS = "♥"
+    DIAMONDS = "♦"
+    CLUBS = "♣"
+    SPADES = "♠"
+
+
+class B58a08bc9_CardRank(Enum):
+    """Represents the thirteen ranks in a standard deck of cards."""
+    TWO = 2
+    THREE = 3
+    FOUR = 4
+    FIVE = 5
+    SIX = 6
+    SEVEN = 7
+    EIGHT = 8
+    NINE = 9
+    TEN = 10
+    JACK = 11
+    QUEEN = 12
+    KING = 13
+    ACE = 14
+
+
+@dataclass
+class B58a08bc9_Card:
+    """Represents a playing card with a rank and suit."""
+    rank: B58a08bc9_CardRank
+    suit: B58a08bc9_CardSuit
+    
+    def __str__(self) -> str:
+        """Returns a string representation of the card."""
+        rank_symbols = {
+            B58a08bc9_CardRank.JACK: "J",
+            B58a08bc9_CardRank.QUEEN: "Q",
+            B58a08bc9_CardRank.KING: "K",
+            B58a08bc9_CardRank.ACE: "A"
+        }
+        rank_str = rank_symbols.get(self.rank, str(self.rank.value))
+        return f"{rank_str}{self.suit.value}"
+
+
+@dataclass
+class B58a08bc9Main:
+    """A poker hand evaluator that can score and compare poker hands."""
+    cards: List[B58a08bc9_Card] = field(default_factory=list)
+    
+    def add_card(self, card: B58a08bc9_Card) -> None:
+        """Add a card to the hand."""
+        if len(self.cards) < 5:
+            self.cards.append(card)
+        else:
+            raise ValueError("A poker hand cannot have more than 5 cards")
+    
+    def evaluate(self) -> Tuple[int, str]:
+        """
+        Evaluates the poker hand and returns a tuple of (score, hand_name).
+        Higher scores indicate stronger hands.
+        """
+        if len(self.cards) != 5:
+            raise ValueError("A poker hand must have exactly 5 cards")
+            
+        ranks = [card.rank for card in self.cards]
+        suits = [card.suit for card in self.cards]
+        
+        # Check for flush
+        is_flush = len(set(suits)) == 1
+        
+        # Check for straight
+        rank_values = sorted([r.value for r in ranks])
+        is_straight = (len(set(rank_values)) == 5 and 
+                      max(rank_values) - min(rank_values) == 4)
+        
+        # Special case: A-5 straight
+        if set(rank_values) == {2, 3, 4, 5, 14}:
+            is_straight = True
+            
+        # Count rank frequencies
+        rank_counts = {}
+        for rank in ranks:
+            rank_counts[rank] = rank_counts.get(rank, 0) + 1
+        
+        # Determine hand type
+        if is_straight and is_flush:
+            return (8, "Straight Flush")
+        elif 4 in rank_counts.values():
+            return (7, "Four of a Kind")
+        elif 3 in rank_counts.values() and 2 in rank_counts.values():
+            return (6, "Full House")
+        elif is_flush:
+            return (5, "Flush")
+        elif is_straight:
+            return (4, "Straight")
+        elif 3 in rank_counts.values():
+            return (3, "Three of a Kind")
+        elif list(rank_counts.values()).count(2) == 2:
+            return (2, "Two Pair")
+        elif 2 in rank_counts.values():
+            return (1, "Pair")
+        else:
+            return (0, "High Card")
+
+
+if __name__ == "__main__":
+    # Create a sample poker hand
+    hand = B58a08bc9Main()
+    hand.add_card(B58a08bc9_Card(B58a08bc9_CardRank.ACE, B58a08bc9_CardSuit.SPADES))
+    hand.add_card(B58a08bc9_Card(B58a08bc9_CardRank.KING, B58a08bc9_CardSuit.SPADES))
+    hand.add_card(B58a08bc9_Card(B58a08bc9_CardRank.QUEEN, B58a08bc9_CardSuit.SPADES))
+    hand.add_card(B58a08bc9_Card(B58a08bc9_CardRank.JACK, B58a08bc9_CardSuit.SPADES))
+    hand.add_card(B58a08bc9_Card(B58a08bc9_CardRank.TEN, B58a08bc9_CardSuit.SPADES))
+    
+    score, name = hand.evaluate()
+    print(f"Hand: {' '.join(str(card) for card in hand.cards)}")
+    print(f"Evaluation: {name} (score: {score})")
+
+# ===== module block end =====
