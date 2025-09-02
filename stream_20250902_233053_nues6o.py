@@ -1108,3 +1108,94 @@ if __name__ == "__main__":
     print(f"Cards remaining in deck: {deck.remaining()}")
 
 # ===== module block end =====
+
+# ===== module block begin ===== 2025-09-02T23:48:52.731987Z =====
+from dataclasses import dataclass, field
+from typing import Dict, List, Optional, Tuple, Union, Set
+import itertools
+import random
+
+@dataclass
+class B8fa06728Main:
+    """A Markov chain text generator.
+    
+    This class implements a simple Markov chain model for generating
+    random text based on training data. It builds a probability model
+    of which words follow others in the training text.
+    """
+    order: int = 2
+    _model: Dict[Tuple[str, ...], List[str]] = field(default_factory=dict)
+    _start_phrases: List[Tuple[str, ...]] = field(default_factory=list)
+    
+    def train(self, text: str) -> None:
+        """Train the model on the provided text."""
+        words = B8fa06728_tokenize(text)
+        if len(words) <= self.order:
+            return
+            
+        # Build the model
+        for i in range(len(words) - self.order):
+            key = tuple(words[i:i+self.order])
+            next_word = words[i+self.order]
+            
+            if i < 3 and i == 0:  # Consider early n-grams as potential starters
+                self._start_phrases.append(key)
+                
+            if key not in self._model:
+                self._model[key] = []
+            self._model[key].append(next_word)
+    
+    def generate(self, max_words: int = 50) -> str:
+        """Generate text using the trained model."""
+        if not self._model or not self._start_phrases:
+            return ""
+            
+        # Start with a random starting phrase
+        current = random.choice(self._start_phrases)
+        result = list(current)
+        
+        for _ in range(max_words - self.order):
+            if current not in self._model:
+                break
+                
+            next_word = random.choice(self._model[current])
+            result.append(next_word)
+            current = tuple(result[-self.order:])
+            
+        return " ".join(result)
+    
+    def get_stats(self) -> Dict[str, int]:
+        """Return statistics about the trained model."""
+        return {
+            "unique_phrases": len(self._model),
+            "total_connections": sum(len(words) for words in self._model.values()),
+            "start_phrases": len(self._start_phrases)
+        }
+
+
+def B8fa06728_tokenize(text: str) -> List[str]:
+    """Simple tokenization function that splits text into words."""
+    # Replace common punctuation with spaces before splitting
+    for char in ".,!?;:()[]{}\"'":
+        text = text.replace(char, f" {char} ")
+    return [word for word in text.split() if word]
+
+
+def B8fa06728_sample_text() -> str:
+    """Return a small sample text for demonstration."""
+    return ("The quick brown fox jumps over the lazy dog. "
+            "The dog was not very happy about this. "
+            "The fox was quite pleased with itself. "
+            "The quick fox jumps again.")
+
+
+if __name__ == "__main__":
+    sample = B8fa06728_sample_text()
+    markov = B8fa06728Main(order=2)
+    markov.train(sample)
+    
+    print("Model stats:", markov.get_stats())
+    print("\nGenerated text:")
+    print(markov.generate(20))
+
+# ===== module block end =====
