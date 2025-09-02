@@ -286,3 +286,103 @@ if __name__ == "__main__":
     print("Query matches:", parser.evaluate({"age": 25, "name": "Jane"}))
 
 # ===== module block end =====
+
+# ===== module block begin ===== 2025-09-02T23:43:21.595861Z =====
+from typing import Dict, List, Optional, Tuple, Union, cast
+from enum import Enum
+import math
+import statistics
+from dataclasses import dataclass, field
+
+class B0b62d5af_TimeSeriesType(Enum):
+    """Types of time series data for analysis."""
+    CONTINUOUS = "continuous"
+    DISCRETE = "discrete"
+    BINARY = "binary"
+
+
+@dataclass
+class B0b62d5afMain:
+    """Time series anomaly detection toolkit with simple statistical methods.
+    
+    Provides methods to detect outliers and anomalies in time series data
+    using z-scores, moving averages, and threshold-based detection.
+    """
+    data: List[float] = field(default_factory=list)
+    series_type: B0b62d5af_TimeSeriesType = B0b62d5af_TimeSeriesType.CONTINUOUS
+    
+    def add_datapoint(self, value: float) -> None:
+        """Add a new datapoint to the time series."""
+        self.data.append(value)
+    
+    def detect_outliers_zscore(self, threshold: float = 2.0) -> List[Tuple[int, float]]:
+        """Detect outliers using z-score method.
+        
+        Args:
+            threshold: Z-score threshold for outlier detection
+            
+        Returns:
+            List of (index, value) tuples representing outliers
+        """
+        if len(self.data) < 2:
+            return []
+            
+        mean = statistics.mean(self.data)
+        std = statistics.stdev(self.data)
+        
+        if std == 0:
+            return []
+            
+        outliers = []
+        for i, value in enumerate(self.data):
+            z_score = abs((value - mean) / std)
+            if z_score > threshold:
+                outliers.append((i, value))
+        
+        return outliers
+    
+    def moving_average(self, window_size: int = 3) -> List[Optional[float]]:
+        """Calculate moving average over the time series.
+        
+        Args:
+            window_size: Size of the moving window
+            
+        Returns:
+            List of moving averages (None for positions with insufficient data)
+        """
+        result = [None] * len(self.data)
+        for i in range(len(self.data)):
+            if i >= window_size - 1:
+                window = self.data[i-(window_size-1):i+1]
+                result[i] = sum(window) / window_size
+        return result
+
+
+def B0b62d5af_detect_trend(data: List[float]) -> float:
+    """Calculate the overall trend in a time series.
+    
+    Returns a coefficient indicating the direction and strength of the trend.
+    Positive values indicate upward trend, negative values indicate downward trend.
+    """
+    if len(data) < 2:
+        return 0.0
+    
+    x = list(range(len(data)))
+    x_mean = sum(x) / len(x)
+    y_mean = sum(data) / len(data)
+    
+    numerator = sum((x[i] - x_mean) * (data[i] - y_mean) for i in range(len(data)))
+    denominator = sum((x[i] - x_mean) ** 2 for i in range(len(data)))
+    
+    return numerator / denominator if denominator != 0 else 0.0
+
+
+if __name__ == "__main__":
+    # Demo of anomaly detection
+    detector = B0b62d5afMain([10, 12, 11, 13, 10, 30, 12, 11, 10, 13])
+    outliers = detector.detect_outliers_zscore(threshold=1.5)
+    trend = B0b62d5af_detect_trend(detector.data)
+    print(f"Detected {len(outliers)} outliers: {outliers}")
+    print(f"Series trend coefficient: {trend:.4f}")
+
+# ===== module block end =====
