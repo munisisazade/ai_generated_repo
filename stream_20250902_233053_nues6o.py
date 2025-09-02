@@ -1000,3 +1000,111 @@ if __name__ == "__main__":
     B8cb22557_demo()
 
 # ===== module block end =====
+
+# ===== module block begin ===== 2025-09-02T23:48:08.582646Z =====
+from typing import Dict, List, Optional, Tuple, Union
+from enum import Enum
+from dataclasses import dataclass
+import math
+import random
+
+
+class Bde144b02_CardSuit(Enum):
+    """Enum representing the four suits in a standard deck of cards."""
+    HEARTS = "♥"
+    DIAMONDS = "♦"
+    CLUBS = "♣"
+    SPADES = "♠"
+
+
+class Bde144b02_CardRank(Enum):
+    """Enum representing the possible ranks of cards in a standard deck."""
+    TWO = 2
+    THREE = 3
+    FOUR = 4
+    FIVE = 5
+    SIX = 6
+    SEVEN = 7
+    EIGHT = 8
+    NINE = 9
+    TEN = 10
+    JACK = 11
+    QUEEN = 12
+    KING = 13
+    ACE = 14
+
+
+@dataclass
+class Bde144b02_Card:
+    """Represents a single playing card with a rank and suit."""
+    rank: Bde144b02_CardRank
+    suit: Bde144b02_CardSuit
+    
+    def __str__(self) -> str:
+        """Return a string representation of the card."""
+        rank_symbols = {
+            Bde144b02_CardRank.JACK: "J",
+            Bde144b02_CardRank.QUEEN: "Q",
+            Bde144b02_CardRank.KING: "K",
+            Bde144b02_CardRank.ACE: "A"
+        }
+        rank_str = rank_symbols.get(self.rank, str(self.rank.value))
+        return f"{rank_str}{self.suit.value}"
+
+
+class Bde144b02Main:
+    """A class representing a standard deck of playing cards with various operations."""
+    
+    def __init__(self, shuffle: bool = True):
+        """
+        Initialize a new deck of cards.
+        
+        Args:
+            shuffle: Whether to shuffle the deck upon creation
+        """
+        self.cards: List[Bde144b02_Card] = []
+        self.build()
+        if shuffle:
+            self.shuffle()
+    
+    def build(self) -> None:
+        """Build a complete deck of 52 cards in order."""
+        self.cards = [
+            Bde144b02_Card(rank, suit)
+            for suit in Bde144b02_CardSuit
+            for rank in Bde144b02_CardRank
+        ]
+    
+    def shuffle(self) -> None:
+        """Shuffle the deck of cards."""
+        random.shuffle(self.cards)
+    
+    def deal(self, num_cards: int = 1) -> List[Bde144b02_Card]:
+        """
+        Deal a specified number of cards from the deck.
+        
+        Args:
+            num_cards: Number of cards to deal
+            
+        Returns:
+            List of dealt cards
+        """
+        if num_cards > len(self.cards):
+            raise ValueError(f"Cannot deal {num_cards} cards; only {len(self.cards)} remaining")
+        
+        dealt_cards = self.cards[:num_cards]
+        self.cards = self.cards[num_cards:]
+        return dealt_cards
+    
+    def remaining(self) -> int:
+        """Return the number of cards remaining in the deck."""
+        return len(self.cards)
+
+
+if __name__ == "__main__":
+    deck = Bde144b02Main()
+    hand = deck.deal(5)
+    print(f"Dealt hand: {', '.join(str(card) for card in hand)}")
+    print(f"Cards remaining in deck: {deck.remaining()}")
+
+# ===== module block end =====
