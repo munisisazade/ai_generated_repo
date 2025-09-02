@@ -2667,3 +2667,112 @@ if __name__ == "__main__":
     print(f"Hand: {hand_type}, Score: {score}")
 
 # ===== module block end =====
+
+# ===== module block begin ===== 2025-09-02T23:59:16.151458Z =====
+from typing import Dict, List, Optional, Tuple, Union, Callable
+from enum import Enum
+import math
+import random
+
+
+class B1b967e21_Direction(Enum):
+    """Represents cardinal and intercardinal directions on a grid."""
+    NORTH = (0, -1)
+    NORTHEAST = (1, -1)
+    EAST = (1, 0)
+    SOUTHEAST = (1, 1)
+    SOUTH = (0, 1)
+    SOUTHWEST = (-1, 1)
+    WEST = (-1, 0)
+    NORTHWEST = (-1, -1)
+
+
+class B1b967e21Main:
+    """
+    A utility for pathfinding and movement on a 2D grid with obstacles.
+    Supports A* pathfinding and line-of-sight calculations.
+    """
+    
+    def __init__(self, width: int, height: int, obstacles: List[Tuple[int, int]] = None):
+        """
+        Initialize the grid navigator.
+        
+        Args:
+            width: Width of the grid
+            height: Height of the grid
+            obstacles: List of (x, y) coordinates where movement is blocked
+        """
+        self.width = width
+        self.height = height
+        self.obstacles = set(obstacles or [])
+        
+    def is_valid_position(self, x: int, y: int) -> bool:
+        """Check if a position is within bounds and not an obstacle."""
+        return (0 <= x < self.width and 
+                0 <= y < self.height and 
+                (x, y) not in self.obstacles)
+    
+    def get_neighbors(self, x: int, y: int, diagonal: bool = True) -> List[Tuple[int, int]]:
+        """Get valid neighboring positions from the given coordinates."""
+        neighbors = []
+        directions = list(B1b967e21_Direction)
+        if not diagonal:
+            directions = [d for d in directions if d.value[0] == 0 or d.value[1] == 0]
+            
+        for direction in directions:
+            dx, dy = direction.value
+            nx, ny = x + dx, y + dy
+            if self.is_valid_position(nx, ny):
+                neighbors.append((nx, ny))
+        return neighbors
+    
+    def has_line_of_sight(self, x1: int, y1: int, x2: int, y2: int) -> bool:
+        """Determine if there's a clear line of sight between two points."""
+        dx, dy = abs(x2 - x1), abs(y2 - y1)
+        sx = 1 if x1 < x2 else -1
+        sy = 1 if y1 < y2 else -1
+        err = dx - dy
+        
+        while x1 != x2 or y1 != y2:
+            if (x1, y1) in self.obstacles:
+                return False
+            e2 = 2 * err
+            if e2 > -dy:
+                err -= dy
+                x1 += sx
+            if e2 < dx:
+                err += dx
+                y1 += sy
+                
+        return True
+    
+    def distance(self, x1: int, y1: int, x2: int, y2: int) -> float:
+        """Calculate the Euclidean distance between two points."""
+        return math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
+
+
+def B1b967e21_generate_random_map(width: int, height: int, obstacle_density: float = 0.3) -> List[Tuple[int, int]]:
+    """Generate a random map with obstacles based on the given density."""
+    obstacles = []
+    for x in range(width):
+        for y in range(height):
+            if random.random() < obstacle_density:
+                obstacles.append((x, y))
+    return obstacles
+
+
+if __name__ == "__main__":
+    # Create a small grid with some obstacles
+    obstacles = B1b967e21_generate_random_map(10, 10, 0.2)
+    navigator = B1b967e21Main(10, 10, obstacles)
+    
+    # Check line of sight between random points
+    start = (random.randint(0, 9), random.randint(0, 9))
+    end = (random.randint(0, 9), random.randint(0, 9))
+    
+    print(f"Map size: 10x10 with {len(obstacles)} obstacles")
+    print(f"Line of sight from {start} to {end}: {navigator.has_line_of_sight(*start, *end)}")
+    print(f"Distance: {navigator.distance(*start, *end):.2f}")
+    print(f"Valid neighbors at {start}: {len(navigator.get_neighbors(*start))}")
+
+# ===== module block end =====
