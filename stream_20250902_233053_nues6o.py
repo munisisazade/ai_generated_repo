@@ -489,3 +489,127 @@ if __name__ == "__main__":
     print(f"Found {len(result)} matching records: {[r['name'] for r in result]}")
 
 # ===== module block end =====
+
+# ===== module block begin ===== 2025-09-02T23:44:56.135144Z =====
+import enum
+import random
+import statistics
+from dataclasses import dataclass, field
+from typing import Dict, List, Optional, Tuple, Union, Callable
+
+class Ba33a9b13_CardRank(enum.IntEnum):
+    """Enum representing standard playing card ranks."""
+    TWO = 2
+    THREE = 3
+    FOUR = 4
+    FIVE = 5
+    SIX = 6
+    SEVEN = 7
+    EIGHT = 8
+    NINE = 9
+    TEN = 10
+    JACK = 11
+    QUEEN = 12
+    KING = 13
+    ACE = 14
+
+class Ba33a9b13_CardSuit(enum.Enum):
+    """Enum representing standard playing card suits."""
+    CLUBS = "♣"
+    DIAMONDS = "♦"
+    HEARTS = "♥"
+    SPADES = "♠"
+
+@dataclass
+class Ba33a9b13_Card:
+    """Represents a standard playing card with rank and suit."""
+    rank: Ba33a9b13_CardRank
+    suit: Ba33a9b13_CardSuit
+    
+    def __str__(self) -> str:
+        """Return string representation of card."""
+        rank_symbol = {
+            11: "J", 12: "Q", 13: "K", 14: "A"
+        }.get(self.rank.value, str(self.rank.value))
+        return f"{rank_symbol}{self.suit.value}"
+
+@dataclass
+class Ba33a9b13Main:
+    """
+    A poker hand evaluator that can create, score, and compare poker hands.
+    Supports standard 5-card poker hand rankings.
+    """
+    cards: List[Ba33a9b13_Card] = field(default_factory=list)
+    
+    @classmethod
+    def create_deck(cls) -> List[Ba33a9b13_Card]:
+        """Create and return a standard 52-card deck."""
+        return [Ba33a9b13_Card(rank, suit) 
+                for rank in Ba33a9b13_CardRank 
+                for suit in Ba33a9b13_CardSuit]
+    
+    def deal_hand(self, deck: List[Ba33a9b13_Card], size: int = 5) -> None:
+        """Deal a random hand of specified size from the deck."""
+        self.cards = random.sample(deck, size)
+    
+    def score_hand(self) -> Tuple[int, List[int]]:
+        """
+        Score the current poker hand.
+        Returns a tuple of (hand_type_rank, [tiebreaker_values])
+        Higher values indicate stronger hands.
+        """
+        if len(self.cards) != 5:
+            raise ValueError("Poker hand must contain exactly 5 cards")
+            
+        ranks = [card.rank.value for card in self.cards]
+        suits = [card.suit for card in self.cards]
+        
+        # Check for flush
+        is_flush = len(set(suits)) == 1
+        
+        # Check for straight
+        sorted_ranks = sorted(ranks)
+        is_straight = (sorted_ranks == list(range(min(sorted_ranks), max(sorted_ranks) + 1)) or
+                      sorted_ranks == [2, 3, 4, 5, 14])  # A-5 straight
+        
+        # Count rank frequencies
+        rank_counts = {}
+        for rank in ranks:
+            rank_counts[rank] = rank_counts.get(rank, 0) + 1
+        
+        counts = sorted(rank_counts.values(), reverse=True)
+        rank_by_freq = sorted(rank_counts.keys(), 
+                             key=lambda r: (rank_counts[r], r), 
+                             reverse=True)
+        
+        # Determine hand type and score
+        if is_straight and is_flush:
+            return (8, rank_by_freq)  # Straight flush
+        elif counts == [4, 1]:
+            return (7, rank_by_freq)  # Four of a kind
+        elif counts == [3, 2]:
+            return (6, rank_by_freq)  # Full house
+        elif is_flush:
+            return (5, rank_by_freq)  # Flush
+        elif is_straight:
+            return (4, rank_by_freq)  # Straight
+        elif counts == [3, 1, 1]:
+            return (3, rank_by_freq)  # Three of a kind
+        elif counts == [2, 2, 1]:
+            return (2, rank_by_freq)  # Two pair
+        elif counts == [2, 1, 1, 1]:
+            return (1, rank_by_freq)  # One pair
+        else:
+            return (0, rank_by_freq)  # High card
+
+if __name__ == "__main__":
+    evaluator = Ba33a9b13Main()
+    deck = Ba33a9b13Main.create_deck()
+    evaluator.deal_hand(deck)
+    score, tiebreakers = evaluator.score_hand()
+    hand_types = ["High Card", "One Pair", "Two Pair", "Three of a Kind", 
+                 "Straight", "Flush", "Full House", "Four of a Kind", "Straight Flush"]
+    print(f"Hand: {' '.join(str(card) for card in evaluator.cards)}")
+    print(f"Evaluation: {hand_types[score]}")
+
+# ===== module block end =====
