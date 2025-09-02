@@ -1669,3 +1669,100 @@ if __name__ == "__main__":
     print(f"Flush hand score: {evaluator.get_hand_score()}")
 
 # ===== module block end =====
+
+# ===== module block begin ===== 2025-09-02T23:52:45.983758Z =====
+from typing import Dict, List, Tuple, Optional, Union, Callable
+from dataclasses import dataclass
+import math
+import re
+
+
+@dataclass
+class B72f97f6eMain:
+    """A simple text sentiment analyzer that uses weighted term matching.
+    
+    This analyzer scores text based on predefined positive and negative terms,
+    with optional term weighting and modifier detection.
+    """
+    positive_terms: Dict[str, float] = None
+    negative_terms: Dict[str, float] = None
+    modifiers: Dict[str, float] = None
+    
+    def __post_init__(self):
+        # Initialize with default values if not provided
+        if self.positive_terms is None:
+            self.positive_terms = {"good": 1.0, "great": 1.5, "excellent": 2.0}
+        if self.negative_terms is None:
+            self.negative_terms = {"bad": 1.0, "terrible": 1.5, "awful": 2.0}
+        if self.modifiers is None:
+            self.modifiers = {"very": 1.5, "extremely": 2.0, "not": -1.0}
+    
+    def analyze(self, text: str) -> float:
+        """Analyze text and return a sentiment score.
+        
+        Args:
+            text: The input text to analyze
+            
+        Returns:
+            A float score where positive values indicate positive sentiment
+            and negative values indicate negative sentiment
+        """
+        words = B72f97f6e_tokenize(text.lower())
+        score = 0.0
+        
+        for i, word in enumerate(words):
+            modifier = 1.0
+            
+            # Check for modifiers before the current word
+            if i > 0 and words[i-1] in self.modifiers:
+                modifier = self.modifiers[words[i-1]]
+            
+            if word in self.positive_terms:
+                score += self.positive_terms[word] * modifier
+            elif word in self.negative_terms:
+                score -= self.negative_terms[word] * modifier
+        
+        return B72f97f6e_normalize_score(score)
+
+
+def B72f97f6e_tokenize(text: str) -> List[str]:
+    """Convert text into a list of tokens (words).
+    
+    Args:
+        text: Input text to tokenize
+        
+    Returns:
+        List of tokens
+    """
+    # Simple tokenization by splitting on whitespace and removing punctuation
+    return re.sub(r'[^\w\s]', '', text).split()
+
+
+def B72f97f6e_normalize_score(score: float) -> float:
+    """Normalize sentiment score to range between -1 and 1.
+    
+    Args:
+        score: Raw sentiment score
+        
+    Returns:
+        Normalized score between -1 and 1
+    """
+    if score == 0:
+        return 0
+    return math.copysign(min(abs(score), 1.0), score)
+
+
+if __name__ == "__main__":
+    analyzer = B72f97f6eMain()
+    test_texts = [
+        "This is good",
+        "This is bad",
+        "This is very good",
+        "This is not good",
+        "This is extremely terrible"
+    ]
+    for text in test_texts:
+        score = analyzer.analyze(text)
+        print(f"'{text}' → Sentiment score: {score:.2f}")
+
+# ===== module block end =====
