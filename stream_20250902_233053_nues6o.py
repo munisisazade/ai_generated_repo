@@ -2535,3 +2535,135 @@ if __name__ == "__main__":
     print(tree.classify({"temperature": 25.0, "humidity": 50.0, "wind": 20.0}))  # fly a kite
 
 # ===== module block end =====
+
+# ===== module block begin ===== 2025-09-02T23:58:28.466912Z =====
+from typing import Dict, List, Optional, Tuple, Union
+from enum import Enum
+import math
+import random
+
+
+class Be6c976f9_CardRank(Enum):
+    """Enum representing standard playing card ranks."""
+    TWO = 2
+    THREE = 3
+    FOUR = 4
+    FIVE = 5
+    SIX = 6
+    SEVEN = 7
+    EIGHT = 8
+    NINE = 9
+    TEN = 10
+    JACK = 11
+    QUEEN = 12
+    KING = 13
+    ACE = 14
+
+
+class Be6c976f9_CardSuit(Enum):
+    """Enum representing standard playing card suits."""
+    CLUBS = 1
+    DIAMONDS = 2
+    HEARTS = 3
+    SPADES = 4
+
+
+class Be6c976f9Main:
+    """
+    A poker hand evaluator that can identify and score different poker hands.
+    
+    This class evaluates 5-card poker hands and determines their type and relative strength.
+    """
+    
+    def __init__(self):
+        self.hand_rankings = {
+            "High Card": 1,
+            "Pair": 2,
+            "Two Pair": 3,
+            "Three of a Kind": 4,
+            "Straight": 5,
+            "Flush": 6,
+            "Full House": 7,
+            "Four of a Kind": 8,
+            "Straight Flush": 9,
+            "Royal Flush": 10
+        }
+    
+    def evaluate_hand(self, cards: List[Tuple[Be6c976f9_CardRank, Be6c976f9_CardSuit]]) -> Tuple[str, int]:
+        """
+        Evaluates a 5-card poker hand and returns its type and score.
+        
+        Args:
+            cards: List of 5 card tuples (rank, suit)
+            
+        Returns:
+            Tuple of (hand_type, score)
+        """
+        if len(cards) != 5:
+            raise ValueError("Poker hand must contain exactly 5 cards")
+            
+        ranks = [card[0] for card in cards]
+        suits = [card[1] for card in cards]
+        
+        # Count occurrences of each rank
+        rank_counts = {}
+        for rank in ranks:
+            rank_counts[rank] = rank_counts.get(rank, 0) + 1
+            
+        # Check for flush (all same suit)
+        is_flush = len(set(suits)) == 1
+        
+        # Check for straight (consecutive ranks)
+        rank_values = sorted([r.value for r in ranks])
+        is_straight = (len(set(rank_values)) == 5 and 
+                      max(rank_values) - min(rank_values) == 4)
+        
+        # Special case for A-2-3-4-5 straight
+        if set(rank_values) == {2, 3, 4, 5, 14}:
+            is_straight = True
+            
+        # Determine hand type
+        if is_straight and is_flush:
+            if max(rank_values) == 14 and min(rank_values) == 10:
+                return "Royal Flush", self.hand_rankings["Royal Flush"] * 1000
+            return "Straight Flush", self.hand_rankings["Straight Flush"] * 1000 + max(rank_values)
+            
+        if 4 in rank_counts.values():
+            return "Four of a Kind", self.hand_rankings["Four of a Kind"] * 1000
+            
+        if 3 in rank_counts.values() and 2 in rank_counts.values():
+            return "Full House", self.hand_rankings["Full House"] * 1000
+            
+        if is_flush:
+            return "Flush", self.hand_rankings["Flush"] * 1000
+            
+        if is_straight:
+            return "Straight", self.hand_rankings["Straight"] * 1000
+            
+        if 3 in rank_counts.values():
+            return "Three of a Kind", self.hand_rankings["Three of a Kind"] * 1000
+            
+        if list(rank_counts.values()).count(2) == 2:
+            return "Two Pair", self.hand_rankings["Two Pair"] * 1000
+            
+        if 2 in rank_counts.values():
+            return "Pair", self.hand_rankings["Pair"] * 1000
+            
+        return "High Card", self.hand_rankings["High Card"] * 1000 + max(rank_values)
+
+
+if __name__ == "__main__":
+    # Create a sample hand: Royal Flush in Spades
+    royal_flush = [
+        (Be6c976f9_CardRank.TEN, Be6c976f9_CardSuit.SPADES),
+        (Be6c976f9_CardRank.JACK, Be6c976f9_CardSuit.SPADES),
+        (Be6c976f9_CardRank.QUEEN, Be6c976f9_CardSuit.SPADES),
+        (Be6c976f9_CardRank.KING, Be6c976f9_CardSuit.SPADES),
+        (Be6c976f9_CardRank.ACE, Be6c976f9_CardSuit.SPADES)
+    ]
+    
+    evaluator = Be6c976f9Main()
+    hand_type, score = evaluator.evaluate_hand(royal_flush)
+    print(f"Hand: {hand_type}, Score: {score}")
+
+# ===== module block end =====
