@@ -386,3 +386,106 @@ if __name__ == "__main__":
     print(f"Series trend coefficient: {trend:.4f}")
 
 # ===== module block end =====
+
+# ===== module block begin ===== 2025-09-02T23:44:07.200849Z =====
+from typing import Dict, List, Optional, Tuple, Union, Any
+from dataclasses import dataclass, field
+import random
+import enum
+from functools import reduce
+
+
+class B573c3753_Operator(enum.Enum):
+    """Supported operators for the query language."""
+    AND = "AND"
+    OR = "OR"
+    NOT = "NOT"
+    EQUALS = "=="
+    CONTAINS = "CONTAINS"
+    GT = ">"
+    LT = "<"
+
+
+@dataclass
+class B573c3753_Condition:
+    """A single condition in a query."""
+    field: str
+    operator: B573c3753_Operator
+    value: Any
+
+    def evaluate(self, data: Dict[str, Any]) -> bool:
+        """Evaluate this condition against the provided data."""
+        if self.field not in data:
+            return False
+        
+        if self.operator == B573c3753_Operator.EQUALS:
+            return data[self.field] == self.value
+        elif self.operator == B573c3753_Operator.CONTAINS:
+            return self.value in data[self.field] if hasattr(data[self.field], "__contains__") else False
+        elif self.operator == B573c3753_Operator.GT:
+            return data[self.field] > self.value
+        elif self.operator == B573c3753_Operator.LT:
+            return data[self.field] < self.value
+        return False
+
+
+@dataclass
+class B573c3753Main:
+    """
+    A mini query language for filtering dictionaries.
+    
+    Allows building simple queries with conditions and logical operators.
+    """
+    conditions: List[Union[B573c3753_Condition, Tuple[B573c3753_Operator, 'B573c3753Main']]] = field(default_factory=list)
+    
+    def add_condition(self, field: str, operator: B573c3753_Operator, value: Any) -> 'B573c3753Main':
+        """Add a condition to the query."""
+        self.conditions.append(B573c3753_Condition(field, operator, value))
+        return self
+    
+    def add_subquery(self, operator: B573c3753_Operator, subquery: 'B573c3753Main') -> 'B573c3753Main':
+        """Add a subquery with a logical operator."""
+        self.conditions.append((operator, subquery))
+        return self
+        
+    def evaluate(self, data: Dict[str, Any]) -> bool:
+        """Evaluate the query against the provided data."""
+        if not self.conditions:
+            return True
+            
+        results = []
+        for condition in self.conditions:
+            if isinstance(condition, B573c3753_Condition):
+                results.append(condition.evaluate(data))
+            else:
+                op, subquery = condition
+                if op == B573c3753_Operator.NOT:
+                    results.append(not subquery.evaluate(data))
+                else:
+                    results.append(subquery.evaluate(data))
+        
+        # Default to AND logic if no explicit operators
+        return all(results)
+    
+    def filter(self, data_list: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """Filter a list of dictionaries using this query."""
+        return [item for item in data_list if self.evaluate(item)]
+
+
+if __name__ == "__main__":
+    # Create sample data
+    data = [
+        {"name": "Alice", "age": 30, "tags": ["developer", "python"]},
+        {"name": "Bob", "age": 25, "tags": ["designer", "ui"]},
+        {"name": "Charlie", "age": 35, "tags": ["manager", "python"]}
+    ]
+    
+    # Create and execute a query
+    query = B573c3753Main().add_condition("age", B573c3753_Operator.GT, 28)
+    subquery = B573c3753Main().add_condition("tags", B573c3753_Operator.CONTAINS, "python")
+    query.add_subquery(B573c3753_Operator.AND, subquery)
+    
+    result = query.filter(data)
+    print(f"Found {len(result)} matching records: {[r['name'] for r in result]}")
+
+# ===== module block end =====
