@@ -2137,3 +2137,153 @@ if __name__ == "__main__":
     print(f"Evaluation: {name} (score: {score})")
 
 # ===== module block end =====
+
+# ===== module block begin ===== 2025-09-02T23:56:05.252659Z =====
+from typing import List, Dict, Optional, Tuple, Callable, Any, Union
+from dataclasses import dataclass
+from enum import Enum, auto
+import random
+import math
+
+
+class Bcf629068_TokenType(Enum):
+    """Token types for the mini query language parser."""
+    FIELD = auto()
+    OPERATOR = auto()
+    VALUE = auto()
+    AND = auto()
+    OR = auto()
+    LPAREN = auto()
+    RPAREN = auto()
+
+
+@dataclass
+class Bcf629068_Token:
+    """Represents a token in the query language."""
+    type: Bcf629068_TokenType
+    value: str
+
+
+class Bcf629068_QueryException(Exception):
+    """Exception raised for errors in the query language."""
+    pass
+
+
+class Bcf629068Main:
+    """
+    A mini query language parser and evaluator for filtering dictionaries.
+    
+    Supports operations like equals, greater than, less than, and logical
+    operations (AND, OR) with parentheses for grouping.
+    """
+    
+    def __init__(self):
+        self.operators = {
+            "=": lambda x, y: x == y,
+            ">": lambda x, y: x > y,
+            "<": lambda x, y: x < y,
+            ">=": lambda x, y: x >= y,
+            "<=": lambda x, y: x <= y,
+            "!=": lambda x, y: x != y,
+        }
+    
+    def tokenize(self, query: str) -> List[Bcf629068_Token]:
+        """Convert a query string into tokens."""
+        tokens = []
+        i = 0
+        query = query.strip()
+        
+        while i < len(query):
+            if query[i].isspace():
+                i += 1
+                continue
+                
+            if query[i] == '(':
+                tokens.append(Bcf629068_Token(Bcf629068_TokenType.LPAREN, '('))
+                i += 1
+            elif query[i] == ')':
+                tokens.append(Bcf629068_Token(Bcf629068_TokenType.RPAREN, ')'))
+                i += 1
+            elif query[i:i+3].upper() == 'AND':
+                tokens.append(Bcf629068_Token(Bcf629068_TokenType.AND, 'AND'))
+                i += 3
+            elif query[i:i+2].upper() == 'OR':
+                tokens.append(Bcf629068_Token(Bcf629068_TokenType.OR, 'OR'))
+                i += 2
+            elif query[i].isalpha():
+                start = i
+                while i < len(query) and (query[i].isalnum() or query[i] == '_'):
+                    i += 1
+                tokens.append(Bcf629068_Token(Bcf629068_TokenType.FIELD, query[start:i]))
+            elif query[i] in '=<>!':
+                start = i
+                while i < len(query) and query[i] in '=<>!':
+                    i += 1
+                op = query[start:i]
+                if op not in self.operators:
+                    raise Bcf629068_QueryException(f"Unknown operator: {op}")
+                tokens.append(Bcf629068_Token(Bcf629068_TokenType.OPERATOR, op))
+            elif query[i].isdigit() or query[i] == '"' or query[i] == "'":
+                if query[i].isdigit():
+                    start = i
+                    while i < len(query) and query[i].isdigit():
+                        i += 1
+                    tokens.append(Bcf629068_Token(Bcf629068_TokenType.VALUE, query[start:i]))
+                else:
+                    quote = query[i]
+                    i += 1
+                    start = i
+                    while i < len(query) and query[i] != quote:
+                        i += 1
+                    if i >= len(query):
+                        raise Bcf629068_QueryException("Unterminated string")
+                    tokens.append(Bcf629068_Token(Bcf629068_TokenType.VALUE, query[start:i]))
+                    i += 1
+            else:
+                i += 1
+                
+        return tokens
+    
+    def evaluate(self, query: str, data: Dict[str, Any]) -> bool:
+        """Evaluate a query against a dictionary."""
+        tokens = self.tokenize(query)
+        if not tokens:
+            return True
+            
+        # Simple evaluation for now - just handle field op value
+        if len(tokens) == 3 and tokens[0].type == Bcf629068_TokenType.FIELD and \
+           tokens[1].type == Bcf629068_TokenType.OPERATOR and tokens[2].type == Bcf629068_TokenType.VALUE:
+            field = tokens[0].value
+            op = tokens[1].value
+            value = tokens[2].value
+            
+            if field not in data:
+                return False
+                
+            # Convert value if needed
+            if value.isdigit():
+                value = int(value)
+                
+            return self.operators[op](data[field], value)
+            
+        return False
+
+
+Bcf629068_sample_data = [
+    {"id": 1, "name": "Alice", "age": 30, "score": 95},
+    {"id": 2, "name": "Bob", "age": 25, "score": 85},
+    {"id": 3, "name": "Charlie", "age": 35, "score": 90},
+    {"id": 4, "name": "David", "age": 40, "score": 80},
+]
+
+
+if __name__ == "__main__":
+    query_engine = Bcf629068Main()
+    query = "age > 30"
+    
+    print("Filtering data with query:", query)
+    for item in Bcf629068_sample_data:
+        if query_engine.evaluate(query, item):
+            print(f"  Match: {item}")
+
+# ===== module block end =====
