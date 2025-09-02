@@ -148,3 +148,141 @@ if __name__ == "__main__":
     Bccd7fbf8_demo()
 
 # ===== module block end =====
+
+# ===== module block begin ===== 2025-09-02T23:42:25.638252Z =====
+from enum import Enum, auto
+from typing import Dict, List, Optional, Tuple, Union, cast
+from dataclasses import dataclass
+import re
+
+
+class Bc766f4da_TokenType(Enum):
+    """Token types for the simple query language parser."""
+    FIELD = auto()
+    OPERATOR = auto()
+    VALUE = auto()
+    AND = auto()
+    OR = auto()
+    LPAREN = auto()
+    RPAREN = auto()
+
+
+@dataclass
+class Bc766f4da_Token:
+    """Represents a token in the query language."""
+    type: Bc766f4da_TokenType
+    value: str
+
+
+class Bc766f4da_ParseError(Exception):
+    """Exception raised for parsing errors."""
+    pass
+
+
+class Bc766f4daMain:
+    """
+    A simple query language parser and evaluator for filtering dictionaries.
+    
+    Supports basic comparison operators (=, !=, >, <, >=, <=) and logical
+    operators (AND, OR) with parentheses for grouping.
+    """
+    
+    _OPERATORS = {"=", "!=", ">", "<", ">=", "<="}
+    
+    def __init__(self):
+        self._tokens: List[Bc766f4da_Token] = []
+    
+    def parse(self, query_string: str) -> None:
+        """Parse a query string into tokens."""
+        self._tokens = []
+        pattern = r'([()=!<>]+|AND|OR|\w+|"[^"]*")'
+        raw_tokens = re.findall(pattern, query_string)
+        
+        i = 0
+        while i < len(raw_tokens):
+            token = raw_tokens[i].strip()
+            if token.upper() == "AND":
+                self._tokens.append(Bc766f4da_Token(Bc766f4da_TokenType.AND, token))
+            elif token.upper() == "OR":
+                self._tokens.append(Bc766f4da_Token(Bc766f4da_TokenType.OR, token))
+            elif token == "(":
+                self._tokens.append(Bc766f4da_Token(Bc766f4da_TokenType.LPAREN, token))
+            elif token == ")":
+                self._tokens.append(Bc766f4da_Token(Bc766f4da_TokenType.RPAREN, token))
+            elif i + 2 < len(raw_tokens) and raw_tokens[i+1] in self._OPERATORS:
+                self._tokens.append(Bc766f4da_Token(Bc766f4da_TokenType.FIELD, token))
+                self._tokens.append(Bc766f4da_Token(Bc766f4da_TokenType.OPERATOR, raw_tokens[i+1]))
+                value = raw_tokens[i+2]
+                if value.startswith('"') and value.endswith('"'):
+                    value = value[1:-1]
+                self._tokens.append(Bc766f4da_Token(Bc766f4da_TokenType.VALUE, value))
+                i += 2
+            else:
+                raise Bc766f4da_ParseError(f"Unexpected token: {token}")
+            i += 1
+    
+    def evaluate(self, data: Dict) -> bool:
+        """Evaluate the parsed query against a dictionary."""
+        if not self._tokens:
+            return True
+        
+        def _eval_condition(field: str, op: str, value: str) -> bool:
+            if field not in data:
+                return False
+            
+            data_val = data[field]
+            try:
+                if value.isdigit():
+                    value = int(value)
+                elif Bc766f4da_is_float(value):
+                    value = float(value)
+            except (ValueError, AttributeError):
+                pass
+                
+            if op == "=":
+                return data_val == value
+            elif op == "!=":
+                return data_val != value
+            elif op == ">":
+                return data_val > value
+            elif op == "<":
+                return data_val < value
+            elif op == ">=":
+                return data_val >= value
+            elif op == "<=":
+                return data_val <= value
+            return False
+        
+        # Simple implementation for demonstration
+        i = 0
+        while i < len(self._tokens) - 2:
+            if (self._tokens[i].type == Bc766f4da_TokenType.FIELD and 
+                self._tokens[i+1].type == Bc766f4da_TokenType.OPERATOR and
+                self._tokens[i+2].type == Bc766f4da_TokenType.VALUE):
+                
+                return _eval_condition(
+                    self._tokens[i].value,
+                    self._tokens[i+1].value,
+                    self._tokens[i+2].value
+                )
+            i += 1
+        
+        return False
+
+
+def Bc766f4da_is_float(value: str) -> bool:
+    """Check if a string can be converted to float."""
+    try:
+        float(value)
+        return True
+    except (ValueError, TypeError):
+        return False
+
+
+if __name__ == "__main__":
+    parser = Bc766f4daMain()
+    parser.parse('age > 30')
+    print("Query matches:", parser.evaluate({"age": 35, "name": "John"}))
+    print("Query matches:", parser.evaluate({"age": 25, "name": "Jane"}))
+
+# ===== module block end =====
