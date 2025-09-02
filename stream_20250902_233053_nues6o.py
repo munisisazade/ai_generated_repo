@@ -1766,3 +1766,108 @@ if __name__ == "__main__":
         print(f"'{text}' → Sentiment score: {score:.2f}")
 
 # ===== module block end =====
+
+# ===== module block begin ===== 2025-09-02T23:53:32.479693Z =====
+from typing import Dict, List, Optional, Tuple, Union
+from dataclasses import dataclass
+import math
+import random
+
+@dataclass
+class B7adfa110Main:
+    """
+    A simple text sentiment analyzer that uses a basic lexicon-based approach
+    to evaluate the sentiment of text inputs.
+    """
+    positive_words: Dict[str, float] = None
+    negative_words: Dict[str, float] = None
+    intensifiers: Dict[str, float] = None
+    
+    def __post_init__(self):
+        # Default lexicons if none provided
+        if self.positive_words is None:
+            self.positive_words = B7adfa110_default_positive_words()
+        if self.negative_words is None:
+            self.negative_words = B7adfa110_default_negative_words()
+        if self.intensifiers is None:
+            self.intensifiers = B7adfa110_default_intensifiers()
+    
+    def analyze(self, text: str) -> Tuple[float, Dict[str, float]]:
+        """
+        Analyze the sentiment of the given text.
+        
+        Args:
+            text: The input text to analyze
+            
+        Returns:
+            Tuple containing (sentiment_score, word_contributions)
+        """
+        if not text:
+            return 0.0, {}
+            
+        words = B7adfa110_tokenize(text)
+        score = 0.0
+        contributions = {}
+        
+        for i, word in enumerate(words):
+            word_lower = word.lower()
+            
+            # Check for positive or negative sentiment
+            if word_lower in self.positive_words:
+                modifier = self._get_modifier(words, i)
+                word_score = self.positive_words[word_lower] * modifier
+                score += word_score
+                contributions[word] = word_score
+            elif word_lower in self.negative_words:
+                modifier = self._get_modifier(words, i)
+                word_score = self.negative_words[word_lower] * modifier
+                score += word_score
+                contributions[word] = word_score
+                
+        return score, contributions
+    
+    def _get_modifier(self, words: List[str], index: int) -> float:
+        """Check for intensifiers before the current word."""
+        if index > 0 and words[index-1].lower() in self.intensifiers:
+            return self.intensifiers[words[index-1].lower()]
+        return 1.0
+
+def B7adfa110_tokenize(text: str) -> List[str]:
+    """Simple tokenization by splitting on whitespace and removing punctuation."""
+    words = []
+    for word in text.split():
+        # Remove basic punctuation but keep apostrophes for contractions
+        clean_word = ''.join(c for c in word if c.isalnum() or c == "'")
+        if clean_word:
+            words.append(clean_word)
+    return words
+
+def B7adfa110_default_positive_words() -> Dict[str, float]:
+    """Return a default set of positive words with their sentiment scores."""
+    return {
+        "good": 1.0, "great": 1.5, "excellent": 2.0, "happy": 1.0, 
+        "love": 1.5, "best": 1.5, "amazing": 1.8, "wonderful": 1.7
+    }
+
+def B7adfa110_default_negative_words() -> Dict[str, float]:
+    """Return a default set of negative words with their sentiment scores."""
+    return {
+        "bad": -1.0, "terrible": -1.8, "awful": -1.5, "sad": -1.0,
+        "hate": -1.5, "worst": -2.0, "horrible": -1.7, "poor": -0.8
+    }
+
+def B7adfa110_default_intensifiers() -> Dict[str, float]:
+    """Return a default set of intensifier words with their modifiers."""
+    return {
+        "very": 1.5, "extremely": 2.0, "really": 1.3, 
+        "somewhat": 0.7, "slightly": 0.5, "not": -1.0
+    }
+
+if __name__ == "__main__":
+    analyzer = B7adfa110Main()
+    test_text = "This product is very good but customer service was extremely terrible"
+    score, details = analyzer.analyze(test_text)
+    print(f"Sentiment score: {score:.2f}")
+    print(f"Word contributions: {details}")
+
+# ===== module block end =====
