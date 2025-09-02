@@ -855,3 +855,148 @@ if __name__ == "__main__":
     print(engine.render(template, {"name": "Alice", "is_admin": False}))
 
 # ===== module block end =====
+
+# ===== module block begin ===== 2025-09-02T23:47:25.284798Z =====
+from typing import Dict, List, Tuple, Optional, Union, Callable
+from dataclasses import dataclass
+import re
+from enum import Enum, auto
+
+class B8cb22557_TokenType(Enum):
+    """Token types for the simple query language parser."""
+    AND = auto()
+    OR = auto()
+    NOT = auto()
+    TERM = auto()
+    LPAREN = auto()
+    RPAREN = auto()
+
+@dataclass
+class B8cb22557_Token:
+    """Represents a token in the query language."""
+    type: B8cb22557_TokenType
+    value: str = ""
+    
+class B8cb22557Main:
+    """
+    A simple boolean query language parser and evaluator.
+    
+    Supports AND, OR, NOT operators and parentheses for grouping.
+    Example: "cats AND (dogs OR birds) NOT fish"
+    """
+    
+    def __init__(self):
+        self.operators = {
+            "AND": B8cb22557_TokenType.AND,
+            "OR": B8cb22557_TokenType.OR,
+            "NOT": B8cb22557_TokenType.NOT
+        }
+    
+    def tokenize(self, query: str) -> List[B8cb22557_Token]:
+        """Convert a query string into a list of tokens."""
+        tokens = []
+        i = 0
+        query = query.strip()
+        
+        while i < len(query):
+            if query[i].isspace():
+                i += 1
+                continue
+                
+            if query[i] == '(':
+                tokens.append(B8cb22557_Token(B8cb22557_TokenType.LPAREN))
+                i += 1
+            elif query[i] == ')':
+                tokens.append(B8cb22557_Token(B8cb22557_TokenType.RPAREN))
+                i += 1
+            else:
+                # Try to match an operator or a term
+                matched = False
+                for op, token_type in self.operators.items():
+                    if query[i:i+len(op)] == op and (i+len(op) >= len(query) or query[i+len(op)].isspace()):
+                        tokens.append(B8cb22557_Token(token_type))
+                        i += len(op)
+                        matched = True
+                        break
+                
+                if not matched:
+                    # It's a term
+                    term_start = i
+                    while i < len(query) and not query[i].isspace() and query[i] not in '()':
+                        i += 1
+                    term = query[term_start:i]
+                    tokens.append(B8cb22557_Token(B8cb22557_TokenType.TERM, term))
+        
+        return tokens
+    
+    def evaluate(self, query: str, document: str) -> bool:
+        """Evaluate a query against a document string."""
+        tokens = self.tokenize(query)
+        
+        def eval_query(tokens: List[B8cb22557_Token], pos: int) -> Tuple[bool, int]:
+            if pos >= len(tokens):
+                return False, pos
+                
+            result, pos = eval_term(tokens, pos)
+            
+            while pos < len(tokens) and tokens[pos].type in (B8cb22557_TokenType.AND, B8cb22557_TokenType.OR):
+                op_type = tokens[pos].type
+                pos += 1
+                
+                right_result, pos = eval_term(tokens, pos)
+                
+                if op_type == B8cb22557_TokenType.AND:
+                    result = result and right_result
+                else:  # OR
+                    result = result or right_result
+                    
+            return result, pos
+            
+        def eval_term(tokens: List[B8cb22557_Token], pos: int) -> Tuple[bool, int]:
+            if pos >= len(tokens):
+                return False, pos
+                
+            if tokens[pos].type == B8cb22557_TokenType.NOT:
+                pos += 1
+                result, pos = eval_term(tokens, pos)
+                return not result, pos
+                
+            if tokens[pos].type == B8cb22557_TokenType.LPAREN:
+                pos += 1
+                result, pos = eval_query(tokens, pos)
+                
+                if pos < len(tokens) and tokens[pos].type == B8cb22557_TokenType.RPAREN:
+                    pos += 1
+                
+                return result, pos
+                
+            if tokens[pos].type == B8cb22557_TokenType.TERM:
+                result = tokens[pos].value.lower() in document.lower()
+                return result, pos + 1
+                
+            return False, pos
+            
+        result, _ = eval_query(tokens, 0)
+        return result
+
+def B8cb22557_demo():
+    """Run a simple demonstration of the query parser."""
+    parser = B8cb22557Main()
+    document = "The quick brown fox jumps over the lazy dog"
+    queries = [
+        "fox AND dog",
+        "fox AND cat",
+        "quick OR cat",
+        "NOT cat",
+        "(fox AND brown) OR (cat AND mouse)",
+        "fox AND (brown OR black) AND NOT cat"
+    ]
+    
+    for query in queries:
+        result = parser.evaluate(query, document)
+        print(f'Query: "{query}" -> {result}')
+
+if __name__ == "__main__":
+    B8cb22557_demo()
+
+# ===== module block end =====
