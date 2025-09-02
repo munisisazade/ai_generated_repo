@@ -2395,3 +2395,143 @@ if __name__ == "__main__":
     print(f"Cards remaining in deck: {deck.cards_remaining()}")
 
 # ===== module block end =====
+
+# ===== module block begin ===== 2025-09-02T23:57:40.740380Z =====
+from typing import Dict, List, Optional, Tuple, Union, TypeVar, Generic
+from dataclasses import dataclass
+from enum import Enum
+import random
+import math
+
+T = TypeVar('T')
+
+class B6db6d0ad_NodeType(Enum):
+    """Enum representing the types of nodes in the decision tree."""
+    DECISION = "decision"
+    LEAF = "leaf"
+
+
+@dataclass
+class B6db6d0adMain(Generic[T]):
+    """
+    A simple decision tree implementation that can be used for basic
+    classification or decision-making processes.
+    """
+    
+    @dataclass
+    class Node:
+        """Internal node representation for the decision tree."""
+        type: B6db6d0ad_NodeType
+        value: Union[T, Tuple[str, float]]
+        children: Optional[Dict[str, 'B6db6d0adMain.Node']] = None
+        
+    def __init__(self):
+        """Initialize an empty decision tree."""
+        self.root: Optional[B6db6d0adMain.Node] = None
+        
+    def add_decision(self, path: List[str], attribute: str, threshold: float) -> None:
+        """
+        Add a decision node to the tree.
+        
+        Args:
+            path: Path to the parent node
+            attribute: Feature name to split on
+            threshold: Value to compare against
+        """
+        if not self.root:
+            self.root = self.Node(B6db6d0ad_NodeType.DECISION, (attribute, threshold), {})
+            return
+            
+        node = self._find_node(path)
+        if node and node.type == B6db6d0ad_NodeType.DECISION:
+            node.children[path[-1]] = self.Node(
+                B6db6d0ad_NodeType.DECISION, 
+                (attribute, threshold), 
+                {}
+            )
+    
+    def add_leaf(self, path: List[str], outcome: T) -> None:
+        """
+        Add a leaf node (final decision) to the tree.
+        
+        Args:
+            path: Path to the parent node
+            outcome: The classification or decision result
+        """
+        if not self.root:
+            self.root = self.Node(B6db6d0ad_NodeType.LEAF, outcome, None)
+            return
+            
+        node = self._find_node(path)
+        if node and node.type == B6db6d0ad_NodeType.DECISION:
+            node.children[path[-1]] = self.Node(B6db6d0ad_NodeType.LEAF, outcome, None)
+    
+    def _find_node(self, path: List[str]) -> Optional[Node]:
+        """Find a node by following the given path."""
+        if not self.root or not path:
+            return self.root
+            
+        current = self.root
+        for i, direction in enumerate(path[:-1]):
+            if current.type != B6db6d0ad_NodeType.DECISION or direction not in current.children:
+                return None
+            current = current.children[direction]
+        return current
+    
+    def classify(self, features: Dict[str, float]) -> Optional[T]:
+        """
+        Classify a sample using the decision tree.
+        
+        Args:
+            features: Dictionary of feature name to value
+            
+        Returns:
+            Classification result or None if no path is found
+        """
+        if not self.root:
+            return None
+            
+        current = self.root
+        while current.type == B6db6d0ad_NodeType.DECISION:
+            attribute, threshold = current.value
+            if attribute not in features:
+                return None
+                
+            direction = "yes" if features[attribute] >= threshold else "no"
+            if not current.children or direction not in current.children:
+                return None
+                
+            current = current.children[direction]
+            
+        return current.value
+
+
+def B6db6d0ad_create_sample_tree() -> B6db6d0adMain[str]:
+    """Create a sample decision tree for demonstration."""
+    tree = B6db6d0adMain[str]()
+    tree.root = tree.Node(
+        B6db6d0ad_NodeType.DECISION,
+        ("temperature", 30.0),
+        {
+            "yes": tree.Node(B6db6d0ad_NodeType.DECISION, ("humidity", 70.0), {
+                "yes": tree.Node(B6db6d0ad_NodeType.LEAF, "don't go outside", None),
+                "no": tree.Node(B6db6d0ad_NodeType.LEAF, "go swimming", None)
+            }),
+            "no": tree.Node(B6db6d0ad_NodeType.DECISION, ("wind", 15.0), {
+                "yes": tree.Node(B6db6d0ad_NodeType.LEAF, "fly a kite", None),
+                "no": tree.Node(B6db6d0ad_NodeType.LEAF, "go hiking", None)
+            })
+        }
+    )
+    return tree
+
+
+if __name__ == "__main__":
+    tree = B6db6d0ad_create_sample_tree()
+    
+    # Test the tree with some sample data
+    print(tree.classify({"temperature": 35.0, "humidity": 80.0, "wind": 5.0}))  # don't go outside
+    print(tree.classify({"temperature": 35.0, "humidity": 60.0, "wind": 5.0}))  # go swimming
+    print(tree.classify({"temperature": 25.0, "humidity": 50.0, "wind": 20.0}))  # fly a kite
+
+# ===== module block end =====
