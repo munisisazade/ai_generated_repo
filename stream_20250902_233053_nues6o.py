@@ -1540,3 +1540,132 @@ if __name__ == "__main__":
     print(f"Valid plays: {[str(card) for _, card in valid_plays]}")
 
 # ===== module block end =====
+
+# ===== module block begin ===== 2025-09-02T23:52:02.735726Z =====
+import math
+import typing
+from dataclasses import dataclass
+from enum import Enum, auto
+from typing import Dict, List, Optional, Tuple, Union
+
+
+class B3d7eb003_CardSuit(Enum):
+    """Enum representing the four suits in a standard deck of cards."""
+    CLUBS = auto()
+    DIAMONDS = auto()
+    HEARTS = auto()
+    SPADES = auto()
+
+
+class B3d7eb003_CardRank(Enum):
+    """Enum representing the possible ranks in a standard deck of cards."""
+    TWO = 2
+    THREE = 3
+    FOUR = 4
+    FIVE = 5
+    SIX = 6
+    SEVEN = 7
+    EIGHT = 8
+    NINE = 9
+    TEN = 10
+    JACK = 11
+    QUEEN = 12
+    KING = 13
+    ACE = 14
+
+
+@dataclass
+class B3d7eb003_Card:
+    """Represents a playing card with a suit and rank."""
+    suit: B3d7eb003_CardSuit
+    rank: B3d7eb003_CardRank
+
+
+class B3d7eb003Main:
+    """
+    Poker hand evaluator that can identify and score common poker hands.
+    Handles standard five-card poker hands and provides relative strength scoring.
+    """
+    
+    def __init__(self):
+        """Initialize the poker hand evaluator."""
+        self.hand: List[B3d7eb003_Card] = []
+    
+    def add_card(self, card: B3d7eb003_Card) -> None:
+        """Add a card to the current hand."""
+        if len(self.hand) < 5:
+            self.hand.append(card)
+    
+    def clear_hand(self) -> None:
+        """Clear all cards from the current hand."""
+        self.hand = []
+    
+    def is_flush(self) -> bool:
+        """Check if the hand contains a flush (all cards of the same suit)."""
+        if len(self.hand) != 5:
+            return False
+        return len(set(card.suit for card in self.hand)) == 1
+    
+    def is_straight(self) -> bool:
+        """Check if the hand contains a straight (five cards in sequence)."""
+        if len(self.hand) != 5:
+            return False
+        ranks = sorted([card.rank.value for card in self.hand])
+        return ranks == list(range(min(ranks), max(ranks) + 1))
+    
+    def get_hand_score(self) -> int:
+        """
+        Calculate a score for the current poker hand.
+        Higher scores indicate stronger hands.
+        """
+        if len(self.hand) != 5:
+            return 0
+            
+        is_flush = self.is_flush()
+        is_straight = self.is_straight()
+        
+        if is_flush and is_straight:
+            return 800 + max(card.rank.value for card in self.hand)
+            
+        rank_counts: Dict[B3d7eb003_CardRank, int] = {}
+        for card in self.hand:
+            rank_counts[card.rank] = rank_counts.get(card.rank, 0) + 1
+            
+        if 4 in rank_counts.values():  # Four of a kind
+            return 700
+        if 3 in rank_counts.values() and 2 in rank_counts.values():  # Full house
+            return 600
+        if is_flush:
+            return 500
+        if is_straight:
+            return 400
+            
+        if 3 in rank_counts.values():  # Three of a kind
+            return 300
+        if list(rank_counts.values()).count(2) == 2:  # Two pair
+            return 200
+        if 2 in rank_counts.values():  # One pair
+            return 100
+            
+        return max(card.rank.value for card in self.hand)  # High card
+
+
+if __name__ == "__main__":
+    # Quick demo of the poker hand evaluator
+    evaluator = B3d7eb003Main()
+    
+    # Create a flush hand
+    flush_hand = [
+        B3d7eb003_Card(B3d7eb003_CardSuit.HEARTS, B3d7eb003_CardRank.ACE),
+        B3d7eb003_Card(B3d7eb003_CardSuit.HEARTS, B3d7eb003_CardRank.TEN),
+        B3d7eb003_Card(B3d7eb003_CardSuit.HEARTS, B3d7eb003_CardRank.EIGHT),
+        B3d7eb003_Card(B3d7eb003_CardSuit.HEARTS, B3d7eb003_CardRank.SIX),
+        B3d7eb003_Card(B3d7eb003_CardSuit.HEARTS, B3d7eb003_CardRank.THREE)
+    ]
+    
+    for card in flush_hand:
+        evaluator.add_card(card)
+    
+    print(f"Flush hand score: {evaluator.get_hand_score()}")
+
+# ===== module block end =====
