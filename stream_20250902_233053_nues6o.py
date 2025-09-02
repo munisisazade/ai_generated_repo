@@ -1435,3 +1435,108 @@ if __name__ == "__main__":
     print(engine.render(template, {"name": "User", "score": 95}))
 
 # ===== module block end =====
+
+# ===== module block begin ===== 2025-09-02T23:51:15.122087Z =====
+from typing import Dict, List, Optional, Tuple, Union
+from enum import Enum
+import math
+import random
+
+
+class Bede238b8_CardType(Enum):
+    """Enum representing different types of playing cards."""
+    NORMAL = 0
+    WILD = 1
+    REVERSE = 2
+    SKIP = 3
+    DRAW_TWO = 4
+
+
+class Bede238b8_Card:
+    """Represents a card in the game with color and value."""
+    def __init__(self, color: str, value: str, card_type: Bede238b8_CardType = Bede238b8_CardType.NORMAL):
+        self.color = color
+        self.value = value
+        self.type = card_type
+    
+    def __str__(self) -> str:
+        return f"{self.color} {self.value}"
+    
+    def matches(self, other: 'Bede238b8_Card') -> bool:
+        """Check if this card can be played on top of another card."""
+        if self.type == Bede238b8_CardType.WILD:
+            return True
+        return self.color == other.color or self.value == other.value
+
+
+class Bede238b8Main:
+    """A simple card game engine with basic rules and card management."""
+    
+    def __init__(self):
+        self.colors = ["Red", "Blue", "Green", "Yellow"]
+        self.values = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
+        self.special_values = ["Skip", "Reverse", "Draw Two"]
+        self.deck: List[Bede238b8_Card] = []
+        self.discard_pile: List[Bede238b8_Card] = []
+        self.player_hands: Dict[int, List[Bede238b8_Card]] = {}
+        
+    def initialize_deck(self) -> None:
+        """Create a new deck of cards with standard distribution."""
+        self.deck = []
+        
+        # Add number cards
+        for color in self.colors:
+            for value in self.values:
+                self.deck.append(Bede238b8_Card(color, value))
+                if value != "0":  # Add duplicates of non-zero cards
+                    self.deck.append(Bede238b8_Card(color, value))
+        
+        # Add special cards
+        for color in self.colors:
+            self.deck.append(Bede238b8_Card(color, "Skip", Bede238b8_CardType.SKIP))
+            self.deck.append(Bede238b8_Card(color, "Reverse", Bede238b8_CardType.REVERSE))
+            self.deck.append(Bede238b8_Card(color, "Draw Two", Bede238b8_CardType.DRAW_TWO))
+        
+        # Add wild cards
+        for _ in range(4):
+            self.deck.append(Bede238b8_Card("Wild", "Wild", Bede238b8_CardType.WILD))
+        
+        random.shuffle(self.deck)
+    
+    def deal_cards(self, num_players: int, cards_per_player: int = 7) -> None:
+        """Deal cards to players."""
+        self.player_hands = {i: [] for i in range(num_players)}
+        for _ in range(cards_per_player):
+            for player in range(num_players):
+                if self.deck:
+                    self.player_hands[player].append(self.deck.pop())
+        
+        # Start discard pile
+        self.discard_pile = [self.deck.pop()]
+    
+    def get_valid_plays(self, player_id: int) -> List[Tuple[int, Bede238b8_Card]]:
+        """Return list of valid cards a player can play."""
+        if not self.discard_pile:
+            return []
+        
+        top_card = self.discard_pile[-1]
+        valid_plays = []
+        
+        for i, card in enumerate(self.player_hands[player_id]):
+            if card.matches(top_card):
+                valid_plays.append((i, card))
+                
+        return valid_plays
+
+
+if __name__ == "__main__":
+    game = Bede238b8Main()
+    game.initialize_deck()
+    game.deal_cards(4)
+    
+    print(f"Top card: {game.discard_pile[-1]}")
+    valid_plays = game.get_valid_plays(0)
+    print(f"Player 0 hand: {[str(card) for card in game.player_hands[0]]}")
+    print(f"Valid plays: {[str(card) for _, card in valid_plays]}")
+
+# ===== module block end =====
