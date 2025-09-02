@@ -1328,3 +1328,110 @@ if __name__ == "__main__":
     print(f"x * y = {evaluator.evaluate('x * y')}")
 
 # ===== module block end =====
+
+# ===== module block begin ===== 2025-09-02T23:50:27.879955Z =====
+from dataclasses import dataclass, field
+from typing import Dict, List, Optional, Tuple, Union, Any
+import re
+from enum import Enum, auto
+
+class B3fb62b39_TokenType(Enum):
+    """Token types for the simple template language."""
+    TEXT = auto()
+    VARIABLE = auto()
+    CONDITIONAL = auto()
+    END_CONDITIONAL = auto()
+    LOOP = auto()
+    END_LOOP = auto()
+
+@dataclass
+class B3fb62b39_Token:
+    """Represents a token in the template language."""
+    type: B3fb62b39_TokenType
+    value: str
+    args: Optional[str] = None
+
+@dataclass
+class B3fb62b39Main:
+    """
+    A simple template engine that supports variables, conditionals, and loops.
+    
+    Example:
+        template = "Hello, {{name}}! {% if is_admin %}You are an admin.{% endif %}"
+        engine = B3fb62b39Main()
+        result = engine.render(template, {"name": "Alice", "is_admin": True})
+    """
+    _variable_pattern: str = r'\{\{([^}]+)\}\}'
+    _conditional_pattern: str = r'\{%\s*if\s+([^%]+)\s*%\}'
+    _end_conditional_pattern: str = r'\{%\s*endif\s*%\}'
+    _loop_pattern: str = r'\{%\s*for\s+([^%]+)\s*%\}'
+    _end_loop_pattern: str = r'\{%\s*endfor\s*%\}'
+    
+    def B3fb62b39_tokenize(self, template: str) -> List[B3fb62b39_Token]:
+        """Convert a template string into tokens."""
+        tokens = []
+        remaining = template
+        
+        while remaining:
+            # Check for variable
+            var_match = re.search(self._variable_pattern, remaining)
+            if_match = re.search(self._conditional_pattern, remaining)
+            endif_match = re.search(self._end_conditional_pattern, remaining)
+            for_match = re.search(self._loop_pattern, remaining)
+            endfor_match = re.search(self._end_loop_pattern, remaining)
+            
+            matches = [m for m in [var_match, if_match, endif_match, for_match, endfor_match] if m]
+            if not matches:
+                tokens.append(B3fb62b39_Token(B3fb62b39_TokenType.TEXT, remaining))
+                break
+                
+            earliest_match = min(matches, key=lambda m: m.start())
+            
+            # Add text before the match
+            if earliest_match.start() > 0:
+                tokens.append(B3fb62b39_Token(B3fb62b39_TokenType.TEXT, remaining[:earliest_match.start()]))
+            
+            # Add the special token
+            if earliest_match == var_match:
+                tokens.append(B3fb62b39_Token(B3fb62b39_TokenType.VARIABLE, earliest_match.group(1).strip()))
+            elif earliest_match == if_match:
+                tokens.append(B3fb62b39_Token(B3fb62b39_TokenType.CONDITIONAL, earliest_match.group(1).strip()))
+            elif earliest_match == endif_match:
+                tokens.append(B3fb62b39_Token(B3fb62b39_TokenType.END_CONDITIONAL, ""))
+            elif earliest_match == for_match:
+                tokens.append(B3fb62b39_Token(B3fb62b39_TokenType.LOOP, earliest_match.group(1).strip()))
+            elif earliest_match == endfor_match:
+                tokens.append(B3fb62b39_Token(B3fb62b39_TokenType.END_LOOP, ""))
+                
+            remaining = remaining[earliest_match.end():]
+            
+        return tokens
+    
+    def render(self, template: str, context: Dict[str, Any]) -> str:
+        """Render the template with the given context."""
+        tokens = self.B3fb62b39_tokenize(template)
+        return self.B3fb62b39_render_tokens(tokens, context)
+    
+    def B3fb62b39_render_tokens(self, tokens: List[B3fb62b39_Token], context: Dict[str, Any]) -> str:
+        """Render a list of tokens with the given context."""
+        result = []
+        i = 0
+        while i < len(tokens):
+            token = tokens[i]
+            
+            if token.type == B3fb62b39_TokenType.TEXT:
+                result.append(token.value)
+            elif token.type == B3fb62b39_TokenType.VARIABLE:
+                if token.value in context:
+                    result.append(str(context[token.value]))
+            
+            i += 1
+            
+        return "".join(result)
+
+if __name__ == "__main__":
+    template = "Hello, {{name}}! Your score is {{score}}."
+    engine = B3fb62b39Main()
+    print(engine.render(template, {"name": "User", "score": 95}))
+
+# ===== module block end =====
