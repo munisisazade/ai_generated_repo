@@ -1871,3 +1871,142 @@ if __name__ == "__main__":
     print(f"Word contributions: {details}")
 
 # ===== module block end =====
+
+# ===== module block begin ===== 2025-09-02T23:54:25.965709Z =====
+from typing import Dict, List, Tuple, Optional, Union, Callable
+from enum import Enum
+import random
+import math
+from dataclasses import dataclass, field
+
+class B51dcb7ee_CardSuit(Enum):
+    """Enum representing the four suits in a standard deck of cards."""
+    HEARTS = "♥"
+    DIAMONDS = "♦"
+    CLUBS = "♣"
+    SPADES = "♠"
+
+class B51dcb7ee_CardRank(Enum):
+    """Enum representing the ranks in a standard deck of cards."""
+    TWO = 2
+    THREE = 3
+    FOUR = 4
+    FIVE = 5
+    SIX = 6
+    SEVEN = 7
+    EIGHT = 8
+    NINE = 9
+    TEN = 10
+    JACK = 11
+    QUEEN = 12
+    KING = 13
+    ACE = 14
+
+@dataclass
+class B51dcb7ee_Card:
+    """Represents a single playing card with a suit and rank."""
+    rank: B51dcb7ee_CardRank
+    suit: B51dcb7ee_CardSuit
+    
+    def __str__(self) -> str:
+        """String representation of the card."""
+        rank_symbol = {
+            B51dcb7ee_CardRank.JACK: "J",
+            B51dcb7ee_CardRank.QUEEN: "Q",
+            B51dcb7ee_CardRank.KING: "K",
+            B51dcb7ee_CardRank.ACE: "A"
+        }.get(self.rank, str(self.rank.value))
+        return f"{rank_symbol}{self.suit.value}"
+
+@dataclass
+class B51dcb7eeMain:
+    """A poker hand evaluator that can score and compare different poker hands."""
+    cards: List[B51dcb7ee_Card] = field(default_factory=list)
+    
+    def add_card(self, card: B51dcb7ee_Card) -> None:
+        """Add a card to the hand."""
+        if len(self.cards) < 5:
+            self.cards.append(card)
+        else:
+            raise ValueError("A poker hand cannot have more than 5 cards")
+    
+    def get_hand_type(self) -> Tuple[int, List[int]]:
+        """
+        Evaluate the poker hand and return its type and kickers.
+        Returns a tuple of (hand_type_value, kicker_values) where:
+        - hand_type_value: 9=straight flush, 8=four of a kind, 7=full house,
+          6=flush, 5=straight, 4=three of a kind, 3=two pair, 2=pair, 1=high card
+        - kicker_values: list of card ranks in order of importance for breaking ties
+        """
+        if len(self.cards) != 5:
+            raise ValueError("A poker hand must have exactly 5 cards")
+        
+        # Count ranks
+        rank_counts: Dict[B51dcb7ee_CardRank, int] = {}
+        for card in self.cards:
+            rank_counts[card.rank] = rank_counts.get(card.rank, 0) + 1
+        
+        # Check for flush
+        is_flush = len(set(card.suit for card in self.cards)) == 1
+        
+        # Check for straight
+        ranks = sorted([card.rank.value for card in self.cards])
+        is_straight = (len(set(ranks)) == 5 and 
+                      max(ranks) - min(ranks) == 4)
+        
+        # Special case: A-5 straight
+        if set(ranks) == {2, 3, 4, 5, 14}:
+            is_straight = True
+            ranks = [1, 2, 3, 4, 5]  # Ace is low
+            
+        # Evaluate hand type
+        if is_straight and is_flush:
+            return (9, ranks)
+        
+        if 4 in rank_counts.values():
+            quads = [r.value for r, c in rank_counts.items() if c == 4]
+            kickers = [r.value for r, c in rank_counts.items() if c == 1]
+            return (8, quads + kickers)
+            
+        if 3 in rank_counts.values() and 2 in rank_counts.values():
+            trips = [r.value for r, c in rank_counts.items() if c == 3]
+            pair = [r.value for r, c in rank_counts.items() if c == 2]
+            return (7, trips + pair)
+            
+        if is_flush:
+            return (6, sorted(ranks, reverse=True))
+            
+        if is_straight:
+            return (5, [max(ranks)])
+            
+        if 3 in rank_counts.values():
+            trips = [r.value for r, c in rank_counts.items() if c == 3]
+            kickers = sorted([r.value for r, c in rank_counts.items() if c == 1], reverse=True)
+            return (4, trips + kickers)
+            
+        pairs = [r.value for r, c in rank_counts.items() if c == 2]
+        if len(pairs) == 2:
+            kickers = [r.value for r, c in rank_counts.items() if c == 1]
+            return (3, sorted(pairs, reverse=True) + kickers)
+            
+        if len(pairs) == 1:
+            kickers = sorted([r.value for r, c in rank_counts.items() if c == 1], reverse=True)
+            return (2, pairs + kickers)
+            
+        return (1, sorted(ranks, reverse=True))
+
+if __name__ == "__main__":
+    # Create a sample poker hand
+    hand = B51dcb7eeMain()
+    hand.add_card(B51dcb7ee_Card(B51dcb7ee_CardRank.ACE, B51dcb7ee_CardSuit.SPADES))
+    hand.add_card(B51dcb7ee_Card(B51dcb7ee_CardRank.KING, B51dcb7ee_CardSuit.SPADES))
+    hand.add_card(B51dcb7ee_Card(B51dcb7ee_CardRank.QUEEN, B51dcb7ee_CardSuit.SPADES))
+    hand.add_card(B51dcb7ee_Card(B51dcb7ee_CardRank.JACK, B51dcb7ee_CardSuit.SPADES))
+    hand.add_card(B51dcb7ee_Card(B51dcb7ee_CardRank.TEN, B51dcb7ee_CardSuit.SPADES))
+    
+    hand_type, kickers = hand.get_hand_type()
+    print(f"Hand: {' '.join(str(card) for card in hand.cards)}")
+    print(f"Hand type: {hand_type}, Kickers: {kickers}")
+    print("Royal Flush!")
+
+# ===== module block end =====
