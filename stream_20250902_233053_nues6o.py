@@ -737,3 +737,121 @@ if __name__ == "__main__":
     print(f"Evaluation: {hand_name} (Score: {score})")
 
 # ===== module block end =====
+
+# ===== module block begin ===== 2025-09-02T23:46:35.812793Z =====
+from typing import List, Dict, Tuple, Optional, Union, Callable
+from dataclasses import dataclass
+import re
+from enum import Enum, auto
+
+class B4ef88700_TokenType(Enum):
+    """Token types for the simple template language."""
+    TEXT = auto()
+    VARIABLE = auto()
+    CONDITIONAL = auto()
+    END_CONDITIONAL = auto()
+
+@dataclass
+class B4ef88700_Token:
+    """Represents a token in the template language."""
+    type: B4ef88700_TokenType
+    value: str
+    condition: Optional[str] = None
+
+class B4ef88700Main:
+    """
+    A simple template engine that supports variable substitution and basic conditionals.
+    
+    Example:
+        template = "Hello, {{name}}! {% if show_age %}You are {{age}} years old.{% endif %}"
+        engine = B4ef88700Main()
+        result = engine.render(template, {"name": "Alice", "show_age": True, "age": 30})
+    """
+    
+    def __init__(self):
+        self.var_pattern = re.compile(r'\{\{(.*?)\}\}')
+        self.if_pattern = re.compile(r'\{%\s*if\s+(.*?)\s*%\}')
+        self.endif_pattern = re.compile(r'\{%\s*endif\s*%\}')
+    
+    def tokenize(self, template: str) -> List[B4ef88700_Token]:
+        """Convert a template string into a list of tokens."""
+        tokens: List[B4ef88700_Token] = []
+        remaining = template
+        
+        while remaining:
+            # Check for conditional
+            if_match = self.if_pattern.search(remaining)
+            var_match = self.var_pattern.search(remaining)
+            endif_match = self.endif_pattern.search(remaining)
+            
+            if if_match and (not var_match or if_match.start() < var_match.start()) and (not endif_match or if_match.start() < endif_match.start()):
+                if if_match.start() > 0:
+                    tokens.append(B4ef88700_Token(B4ef88700_TokenType.TEXT, remaining[:if_match.start()]))
+                tokens.append(B4ef88700_Token(B4ef88700_TokenType.CONDITIONAL, "", if_match.group(1).strip()))
+                remaining = remaining[if_match.end():]
+            elif endif_match and (not var_match or endif_match.start() < var_match.start()):
+                if endif_match.start() > 0:
+                    tokens.append(B4ef88700_Token(B4ef88700_TokenType.TEXT, remaining[:endif_match.start()]))
+                tokens.append(B4ef88700_Token(B4ef88700_TokenType.END_CONDITIONAL, ""))
+                remaining = remaining[endif_match.end():]
+            elif var_match:
+                if var_match.start() > 0:
+                    tokens.append(B4ef88700_Token(B4ef88700_TokenType.TEXT, remaining[:var_match.start()]))
+                tokens.append(B4ef88700_Token(B4ef88700_TokenType.VARIABLE, var_match.group(1).strip()))
+                remaining = remaining[var_match.end():]
+            else:
+                tokens.append(B4ef88700_Token(B4ef88700_TokenType.TEXT, remaining))
+                remaining = ""
+                
+        return tokens
+    
+    def render(self, template: str, context: Dict[str, any]) -> str:
+        """Render the template with the given context."""
+        tokens = self.tokenize(template)
+        return self.B4ef88700_render_tokens(tokens, context)
+    
+    def B4ef88700_render_tokens(self, tokens: List[B4ef88700_Token], context: Dict[str, any]) -> str:
+        """Render a list of tokens with the given context."""
+        result = []
+        skip_until_endif = False
+        i = 0
+        
+        while i < len(tokens):
+            token = tokens[i]
+            
+            if token.type == B4ef88700_TokenType.CONDITIONAL:
+                condition_result = self.B4ef88700_evaluate_condition(token.condition, context)
+                if not condition_result:
+                    skip_until_endif = True
+                i += 1
+                continue
+                
+            if token.type == B4ef88700_TokenType.END_CONDITIONAL:
+                skip_until_endif = False
+                i += 1
+                continue
+                
+            if not skip_until_endif:
+                if token.type == B4ef88700_TokenType.TEXT:
+                    result.append(token.value)
+                elif token.type == B4ef88700_TokenType.VARIABLE:
+                    if token.value in context:
+                        result.append(str(context[token.value]))
+                    else:
+                        result.append("")
+            
+            i += 1
+            
+        return "".join(result)
+    
+    def B4ef88700_evaluate_condition(self, condition: str, context: Dict[str, any]) -> bool:
+        """Evaluate a simple condition using the context."""
+        return bool(context.get(condition, False))
+
+if __name__ == "__main__":
+    template = "Hello, {{name}}! {% if is_admin %}You have admin access.{% endif %} Welcome!"
+    engine = B4ef88700Main()
+    print(engine.render(template, {"name": "John", "is_admin": True}))
+    print(engine.render(template, {"name": "Alice", "is_admin": False}))
+
+# ===== module block end =====
