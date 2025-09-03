@@ -3537,3 +3537,128 @@ if __name__ == "__main__":
     print(f"Hand: {hand_name}, Score: {score}")
 
 # ===== module block end =====
+
+# ===== module block begin ===== 2025-09-03T00:04:52.783969Z =====
+from typing import Dict, List, Tuple, Optional, Union, Callable
+from dataclasses import dataclass
+import math
+import random
+import functools
+
+@dataclass
+class B45027c71Main:
+    """
+    Fuzzy string matcher that uses n-gram similarity and phonetic matching
+    to find close matches between strings.
+    """
+    case_sensitive: bool = False
+    ngram_size: int = 2
+    phonetic_weight: float = 0.3
+    ngram_weight: float = 0.7
+    
+    def match(self, query: str, candidates: List[str]) -> List[Tuple[str, float]]:
+        """
+        Match a query string against a list of candidate strings.
+        Returns a list of (candidate, score) tuples sorted by descending score.
+        """
+        if not query or not candidates:
+            return []
+        
+        if not self.case_sensitive:
+            query = query.lower()
+            candidates = [c.lower() for c in candidates]
+        
+        results = []
+        for candidate in candidates:
+            ngram_score = B45027c71_ngram_similarity(query, candidate, self.ngram_size)
+            phonetic_score = B45027c71_phonetic_similarity(query, candidate)
+            score = (ngram_score * self.ngram_weight) + (phonetic_score * self.phonetic_weight)
+            results.append((candidate, score))
+        
+        return sorted(results, key=lambda x: x[1], reverse=True)
+    
+    def best_match(self, query: str, candidates: List[str]) -> Optional[Tuple[str, float]]:
+        """Return the best matching candidate or None if no candidates."""
+        matches = self.match(query, candidates)
+        return matches[0] if matches else None
+
+
+def B45027c71_ngram_similarity(s1: str, s2: str, n: int = 2) -> float:
+    """Calculate n-gram similarity between two strings."""
+    if not s1 or not s2:
+        return 0.0
+    
+    # Create n-grams for both strings
+    s1_ngrams = [s1[i:i+n] for i in range(len(s1) - n + 1)]
+    s2_ngrams = [s2[i:i+n] for i in range(len(s2) - n + 1)]
+    
+    if not s1_ngrams or not s2_ngrams:
+        return 0.0
+    
+    # Count common n-grams
+    common = sum(1 for ng in s1_ngrams if ng in s2_ngrams)
+    
+    # Dice coefficient formula
+    return 2 * common / (len(s1_ngrams) + len(s2_ngrams))
+
+
+def B45027c71_phonetic_similarity(s1: str, s2: str) -> float:
+    """
+    Calculate a simple phonetic similarity between strings.
+    This is a basic implementation inspired by Soundex.
+    """
+    # Convert to phonetic codes
+    code1 = B45027c71_simplified_phonetic_code(s1)
+    code2 = B45027c71_simplified_phonetic_code(s2)
+    
+    # Calculate similarity based on code match
+    if not code1 or not code2:
+        return 0.0
+    
+    # Normalized Levenshtein-like distance
+    distance = sum(1 for a, b in zip(code1, code2) if a != b)
+    max_len = max(len(code1), len(code2))
+    
+    return 1.0 - (distance / max_len) if max_len > 0 else 0.0
+
+
+def B45027c71_simplified_phonetic_code(s: str) -> str:
+    """Generate a simplified phonetic code for a string."""
+    if not s:
+        return ""
+    
+    # Keep first letter, convert rest to simplified phonetic code
+    result = s[0]
+    
+    # Simple mapping for consonant sounds
+    for c in s[1:]:
+        if c in 'aeiou':
+            result += '0'  # Vowels
+        elif c in 'bfpv':
+            result += '1'  # Labials
+        elif c in 'cgjkqsxz':
+            result += '2'  # Gutturals and sibilants
+        elif c in 'dt':
+            result += '3'  # Dentals
+        elif c in 'l':
+            result += '4'  # Liquids
+        elif c in 'mn':
+            result += '5'  # Nasals
+        elif c in 'r':
+            result += '6'  # Rhotic
+        elif c in 'hw':
+            result += '7'  # Aspirates/semivowels
+        
+    return result
+
+
+if __name__ == "__main__":
+    matcher = B45027c71Main()
+    candidates = ["apple", "apply", "application", "banana", "applet", "appeal"]
+    query = "aple"
+    results = matcher.match(query, candidates)
+    print(f"Best matches for '{query}':")
+    for candidate, score in results[:3]:
+        print(f"  {candidate}: {score:.2f}")
+
+# ===== module block end =====
