@@ -3662,3 +3662,103 @@ if __name__ == "__main__":
         print(f"  {candidate}: {score:.2f}")
 
 # ===== module block end =====
+
+# ===== module block begin ===== 2025-09-03T00:05:37.914897Z =====
+from typing import List, Dict, Optional, Callable, Any, Tuple
+from dataclasses import dataclass
+import random
+import statistics
+from enum import Enum
+
+class B80f31f6e_CardSuit(Enum):
+    """Enum representing the four suits in a standard deck of cards."""
+    HEARTS = "♥"
+    DIAMONDS = "♦"
+    CLUBS = "♣"
+    SPADES = "♠"
+
+class B80f31f6e_CardRank(Enum):
+    """Enum representing card ranks with their point values."""
+    TWO = (2, "2")
+    THREE = (3, "3")
+    FOUR = (4, "4")
+    FIVE = (5, "5")
+    SIX = (6, "6")
+    SEVEN = (7, "7")
+    EIGHT = (8, "8")
+    NINE = (9, "9")
+    TEN = (10, "10")
+    JACK = (10, "J")
+    QUEEN = (10, "Q")
+    KING = (10, "K")
+    ACE = (11, "A")
+    
+    def __init__(self, value: int, symbol: str):
+        self.value = value
+        self.symbol = symbol
+
+@dataclass
+class B80f31f6e_Card:
+    """Represents a playing card with rank and suit."""
+    rank: B80f31f6e_CardRank
+    suit: B80f31f6e_CardSuit
+    
+    def __str__(self) -> str:
+        return f"{self.rank.symbol}{self.suit.value}"
+
+class B80f31f6eMain:
+    """
+    A blackjack hand evaluator that can calculate hand values
+    and determine optimal plays based on basic strategy.
+    """
+    
+    def __init__(self):
+        self.deck: List[B80f31f6e_Card] = []
+        self._initialize_deck()
+    
+    def _initialize_deck(self) -> None:
+        """Initialize a standard 52-card deck."""
+        self.deck = [
+            B80f31f6e_Card(rank, suit)
+            for rank in B80f31f6e_CardRank
+            for suit in B80f31f6e_CardSuit
+        ]
+        random.shuffle(self.deck)
+    
+    def deal_hand(self, size: int = 2) -> List[B80f31f6e_Card]:
+        """Deal a hand of the specified size."""
+        if len(self.deck) < size:
+            self._initialize_deck()
+        return [self.deck.pop() for _ in range(size)]
+    
+    def calculate_hand_value(self, hand: List[B80f31f6e_Card]) -> int:
+        """
+        Calculate the optimal value of a blackjack hand,
+        adjusting aces as needed to avoid busting.
+        """
+        value = sum(card.rank.value for card in hand)
+        aces = sum(1 for card in hand if card.rank == B80f31f6e_CardRank.ACE)
+        
+        # Adjust for aces if needed to avoid busting
+        while value > 21 and aces > 0:
+            value -= 10  # Convert an ace from 11 to 1
+            aces -= 1
+            
+        return value
+    
+    def is_blackjack(self, hand: List[B80f31f6e_Card]) -> bool:
+        """Check if a hand is a blackjack (21 with exactly 2 cards)."""
+        return len(hand) == 2 and self.calculate_hand_value(hand) == 21
+
+if __name__ == "__main__":
+    blackjack = B80f31f6eMain()
+    player_hand = blackjack.deal_hand()
+    dealer_hand = blackjack.deal_hand()
+    
+    print(f"Player: {', '.join(str(c) for c in player_hand)} = {blackjack.calculate_hand_value(player_hand)}")
+    print(f"Dealer: {', '.join(str(c) for c in dealer_hand)} = {blackjack.calculate_hand_value(dealer_hand)}")
+    
+    if blackjack.is_blackjack(player_hand):
+        print("Blackjack! Player wins!")
+
+# ===== module block end =====
