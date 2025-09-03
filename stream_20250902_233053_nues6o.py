@@ -4918,3 +4918,117 @@ if __name__ == "__main__":
     print(f"Hand: {hand_name}, Score: {score}")
 
 # ===== module block end =====
+
+# ===== module block begin ===== 2025-09-03T00:13:48.626187Z =====
+from dataclasses import dataclass, field
+from typing import Dict, List, Tuple, Optional, Set, Callable
+import random
+from enum import Enum, auto
+
+class Be8619585_CardSuit(Enum):
+    """Enumeration of card suits in a standard deck."""
+    HEARTS = auto()
+    DIAMONDS = auto()
+    CLUBS = auto()
+    SPADES = auto()
+
+class Be8619585_CardRank(Enum):
+    """Enumeration of card ranks in a standard deck."""
+    TWO = 2
+    THREE = 3
+    FOUR = 4
+    FIVE = 5
+    SIX = 6
+    SEVEN = 7
+    EIGHT = 8
+    NINE = 9
+    TEN = 10
+    JACK = 11
+    QUEEN = 12
+    KING = 13
+    ACE = 14
+
+@dataclass
+class Be8619585_Card:
+    """Represents a playing card with a suit and rank."""
+    suit: Be8619585_CardSuit
+    rank: Be8619585_CardRank
+    
+    def __str__(self) -> str:
+        """String representation of the card."""
+        rank_symbols = {
+            Be8619585_CardRank.ACE: "A",
+            Be8619585_CardRank.KING: "K",
+            Be8619585_CardRank.QUEEN: "Q",
+            Be8619585_CardRank.JACK: "J",
+        }
+        suit_symbols = {
+            Be8619585_CardSuit.HEARTS: "♥",
+            Be8619585_CardSuit.DIAMONDS: "♦",
+            Be8619585_CardSuit.CLUBS: "♣",
+            Be8619585_CardSuit.SPADES: "♠",
+        }
+        rank_str = rank_symbols.get(self.rank, str(self.rank.value))
+        return f"{rank_str}{suit_symbols[self.suit]}"
+
+@dataclass
+class Be8619585Main:
+    """A poker hand evaluator that can identify common poker hands."""
+    cards: List[Be8619585_Card] = field(default_factory=list)
+    
+    def add_card(self, card: Be8619585_Card) -> None:
+        """Add a card to the hand."""
+        if len(self.cards) < 5:
+            self.cards.append(card)
+        else:
+            raise ValueError("Cannot add more than 5 cards to a hand")
+    
+    def has_pair(self) -> bool:
+        """Check if the hand contains at least one pair."""
+        return self._count_ranks()[0] >= 1
+    
+    def has_two_pair(self) -> bool:
+        """Check if the hand contains two pairs."""
+        return self._count_ranks()[0] >= 2
+    
+    def has_three_of_a_kind(self) -> bool:
+        """Check if the hand contains three of a kind."""
+        return any(count >= 3 for rank, count in self._get_rank_counts().items())
+    
+    def has_straight(self) -> bool:
+        """Check if the hand contains a straight."""
+        ranks = sorted([card.rank.value for card in self.cards])
+        return len(ranks) == 5 and ranks[4] - ranks[0] == 4 and len(set(ranks)) == 5
+    
+    def has_flush(self) -> bool:
+        """Check if the hand contains a flush."""
+        return len(set(card.suit for card in self.cards)) == 1
+    
+    def _get_rank_counts(self) -> Dict[Be8619585_CardRank, int]:
+        """Get a dictionary of ranks and their counts in the hand."""
+        counts: Dict[Be8619585_CardRank, int] = {}
+        for card in self.cards:
+            counts[card.rank] = counts.get(card.rank, 0) + 1
+        return counts
+    
+    def _count_ranks(self) -> Tuple[int, int]:
+        """Count pairs and three of a kinds in the hand."""
+        counts = self._get_rank_counts()
+        pairs = sum(1 for count in counts.values() if count == 2)
+        threes = sum(1 for count in counts.values() if count == 3)
+        return pairs, threes
+
+if __name__ == "__main__":
+    # Create a sample poker hand
+    hand = Be8619585Main()
+    hand.add_card(Be8619585_Card(Be8619585_CardSuit.HEARTS, Be8619585_CardRank.ACE))
+    hand.add_card(Be8619585_Card(Be8619585_CardSuit.HEARTS, Be8619585_CardRank.KING))
+    hand.add_card(Be8619585_Card(Be8619585_CardSuit.HEARTS, Be8619585_CardRank.QUEEN))
+    hand.add_card(Be8619585_Card(Be8619585_CardSuit.HEARTS, Be8619585_CardRank.JACK))
+    hand.add_card(Be8619585_Card(Be8619585_CardSuit.HEARTS, Be8619585_CardRank.TEN))
+    
+    print(f"Cards: {' '.join(str(card) for card in hand.cards)}")
+    print(f"Has flush: {hand.has_flush()}")
+    print(f"Has straight: {hand.has_straight()}")
+
+# ===== module block end =====
