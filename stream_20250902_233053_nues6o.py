@@ -4521,3 +4521,155 @@ if __name__ == "__main__":
         print(f"  '{match}': {score:.2f}")
 
 # ===== module block end =====
+
+# ===== module block begin ===== 2025-09-03T00:11:23.037933Z =====
+from typing import List, Dict, Tuple, Optional, Union, Callable
+from dataclasses import dataclass
+from enum import Enum
+import math
+import statistics
+import random
+
+
+class Bea4e65d6_CardSuit(Enum):
+    """Enum representing the four suits in a standard deck of cards."""
+    HEARTS = "♥"
+    DIAMONDS = "♦"
+    CLUBS = "♣"
+    SPADES = "♠"
+
+
+class Bea4e65d6_CardRank(Enum):
+    """Enum representing the ranks in a standard deck of cards."""
+    TWO = 2
+    THREE = 3
+    FOUR = 4
+    FIVE = 5
+    SIX = 6
+    SEVEN = 7
+    EIGHT = 8
+    NINE = 9
+    TEN = 10
+    JACK = 11
+    QUEEN = 12
+    KING = 13
+    ACE = 14
+
+
+@dataclass(frozen=True)
+class Bea4e65d6_Card:
+    """Represents a single playing card with a suit and rank."""
+    rank: Bea4e65d6_CardRank
+    suit: Bea4e65d6_CardSuit
+    
+    def __str__(self) -> str:
+        """String representation of the card."""
+        rank_symbols = {
+            Bea4e65d6_CardRank.JACK: "J",
+            Bea4e65d6_CardRank.QUEEN: "Q", 
+            Bea4e65d6_CardRank.KING: "K",
+            Bea4e65d6_CardRank.ACE: "A"
+        }
+        rank_symbol = rank_symbols.get(self.rank, str(self.rank.value))
+        return f"{rank_symbol}{self.suit.value}"
+
+
+class Bea4e65d6Main:
+    """
+    Poker hand evaluator that can determine hand types and compare hands.
+    Implements a simplified poker hand ranking system.
+    """
+    
+    def __init__(self):
+        """Initialize the poker hand evaluator."""
+        self.hand_types = {
+            "High Card": 1,
+            "Pair": 2,
+            "Two Pair": 3,
+            "Three of a Kind": 4,
+            "Straight": 5,
+            "Flush": 6,
+            "Full House": 7,
+            "Four of a Kind": 8,
+            "Straight Flush": 9,
+            "Royal Flush": 10
+        }
+    
+    def evaluate_hand(self, cards: List[Bea4e65d6_Card]) -> Tuple[str, List[int]]:
+        """
+        Evaluate a poker hand and return its type and kickers.
+        
+        Args:
+            cards: A list of 5 cards
+            
+        Returns:
+            A tuple of (hand_type, kicker_values)
+        """
+        if len(cards) != 5:
+            raise ValueError("A poker hand must contain exactly 5 cards")
+            
+        # Count ranks
+        rank_counts: Dict[Bea4e65d6_CardRank, int] = {}
+        for card in cards:
+            rank_counts[card.rank] = rank_counts.get(card.rank, 0) + 1
+            
+        # Check if flush
+        is_flush = len(set(card.suit for card in cards)) == 1
+        
+        # Check if straight
+        ranks = sorted([card.rank.value for card in cards])
+        is_straight = (len(set(ranks)) == 5 and 
+                      max(ranks) - min(ranks) == 4)
+        
+        # Special case: A-5 straight
+        if set(ranks) == {2, 3, 4, 5, 14}:
+            is_straight = True
+            ranks = [1, 2, 3, 4, 5]  # Ace is low
+            
+        # Determine hand type
+        if is_straight and is_flush:
+            if max(ranks) == 14:
+                return "Royal Flush", ranks
+            return "Straight Flush", ranks
+            
+        if 4 in rank_counts.values():
+            return "Four of a Kind", ranks
+            
+        if 3 in rank_counts.values() and 2 in rank_counts.values():
+            return "Full House", ranks
+            
+        if is_flush:
+            return "Flush", ranks
+            
+        if is_straight:
+            return "Straight", ranks
+            
+        if 3 in rank_counts.values():
+            return "Three of a Kind", ranks
+            
+        if list(rank_counts.values()).count(2) == 2:
+            return "Two Pair", ranks
+            
+        if 2 in rank_counts.values():
+            return "Pair", ranks
+            
+        return "High Card", ranks
+
+
+if __name__ == "__main__":
+    # Create a simple demo with a poker hand
+    evaluator = Bea4e65d6Main()
+    
+    hand = [
+        Bea4e65d6_Card(Bea4e65d6_CardRank.ACE, Bea4e65d6_CardSuit.HEARTS),
+        Bea4e65d6_Card(Bea4e65d6_CardRank.KING, Bea4e65d6_CardSuit.HEARTS),
+        Bea4e65d6_Card(Bea4e65d6_CardRank.QUEEN, Bea4e65d6_CardSuit.HEARTS),
+        Bea4e65d6_Card(Bea4e65d6_CardRank.JACK, Bea4e65d6_CardSuit.HEARTS),
+        Bea4e65d6_Card(Bea4e65d6_CardRank.TEN, Bea4e65d6_CardSuit.HEARTS),
+    ]
+    
+    hand_type, kickers = evaluator.evaluate_hand(hand)
+    print(f"Hand: {' '.join(str(card) for card in hand)}")
+    print(f"Evaluation: {hand_type}")
+
+# ===== module block end =====
