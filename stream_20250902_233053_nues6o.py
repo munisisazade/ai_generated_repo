@@ -3152,3 +3152,167 @@ if __name__ == "__main__":
     print(f"Has pair: {evaluator.has_pair(hand)}")
 
 # ===== module block end =====
+
+# ===== module block begin ===== 2025-09-03T00:02:33.241853Z =====
+from typing import Dict, List, Optional, Tuple, Union, Any
+from dataclasses import dataclass, field
+import re
+from enum import Enum
+
+class B95abe433_TokenType(Enum):
+    """Token types for the mini template engine."""
+    TEXT = 1
+    VARIABLE = 2
+    CONDITIONAL = 3
+    LOOP_START = 4
+    LOOP_END = 5
+
+@dataclass
+class B95abe433_Token:
+    """Represents a parsed token in the template."""
+    type: B95abe433_TokenType
+    content: str
+    params: Optional[List[str]] = None
+
+class B95abe433Main:
+    """
+    A mini template engine that supports variable substitution, 
+    conditionals, and simple loops.
+    
+    Example:
+        template = "Hello, {{name}}! {% if show_items %}Items: {% for item in items %}{{item}}, {% endfor %}{% endif %}"
+        engine = B95abe433Main()
+        result = engine.render(template, {"name": "World", "show_items": True, "items": ["A", "B", "C"]})
+    """
+    
+    def __init__(self):
+        self.var_pattern = re.compile(r'\{\{\s*([a-zA-Z0-9_\.]+)\s*\}\}')
+        self.if_pattern = re.compile(r'\{%\s*if\s+([a-zA-Z0-9_\.]+)\s*%\}')
+        self.endif_pattern = re.compile(r'\{%\s*endif\s*%\}')
+        self.for_pattern = re.compile(r'\{%\s*for\s+([a-zA-Z0-9_]+)\s+in\s+([a-zA-Z0-9_\.]+)\s*%\}')
+        self.endfor_pattern = re.compile(r'\{%\s*endfor\s*%\}')
+    
+    def _tokenize(self, template: str) -> List[B95abe433_Token]:
+        """Parse the template into tokens."""
+        tokens = []
+        position = 0
+        
+        while position < len(template):
+            # Check for variable
+            var_match = self.var_pattern.search(template, position)
+            if_match = self.if_pattern.search(template, position)
+            endif_match = self.endif_pattern.search(template, position)
+            for_match = self.for_pattern.search(template, position)
+            endfor_match = self.endfor_pattern.search(template, position)
+            
+            # Find the closest match
+            matches = [m for m in [var_match, if_match, endif_match, for_match, endfor_match] if m]
+            if not matches:
+                # No more tokens, add remaining text
+                tokens.append(B95abe433_Token(B95abe433_TokenType.TEXT, template[position:]))
+                break
+                
+            closest = min(matches, key=lambda m: m.start())
+            
+            # Add text before the token
+            if closest.start() > position:
+                tokens.append(B95abe433_Token(B95abe433_TokenType.TEXT, template[position:closest.start()]))
+            
+            # Add the token
+            if closest == var_match:
+                tokens.append(B95abe433_Token(B95abe433_TokenType.VARIABLE, closest.group(1)))
+                position = closest.end()
+            elif closest == if_match:
+                tokens.append(B95abe433_Token(B95abe433_TokenType.CONDITIONAL, closest.group(1)))
+                position = closest.end()
+            elif closest == endif_match:
+                tokens.append(B95abe433_Token(B95abe433_TokenType.CONDITIONAL, "endif"))
+                position = closest.end()
+            elif closest == for_match:
+                tokens.append(B95abe433_Token(
+                    B95abe433_TokenType.LOOP_START, 
+                    closest.group(2),
+                    [closest.group(1)]
+                ))
+                position = closest.end()
+            elif closest == endfor_match:
+                tokens.append(B95abe433_Token(B95abe433_TokenType.LOOP_END, "endfor"))
+                position = closest.end()
+        
+        return tokens
+    
+    def render(self, template: str, context: Dict[str, Any]) -> str:
+        """Render the template with the given context."""
+        tokens = self._tokenize(template)
+        return self._process_tokens(tokens, context)
+    
+    def _process_tokens(self, tokens: List[B95abe433_Token], context: Dict[str, Any], 
+                        index: int = 0, loop_var: Optional[str] = None) -> str:
+        result = []
+        i = index
+        
+        while i < len(tokens):
+            token = tokens[i]
+            
+            if token.type == B95abe433_TokenType.TEXT:
+                result.append(token.content)
+            elif token.type == B95abe433_TokenType.VARIABLE:
+                if token.content in context:
+                    result.append(str(context[token.content]))
+            elif token.type == B95abe433_TokenType.CONDITIONAL:
+                if token.content == "endif":
+                    return "".join(result), i + 1
+                condition_value = context.get(token.content, False)
+                if condition_value:
+                    inner_result, new_i = self._process_tokens(tokens, context, i + 1)
+                    result.append(inner_result)
+                    i = new_i - 1  # -1 because we'll increment at the end of the loop
+                else:
+                    # Skip to matching endif
+                    depth = 1
+                    j = i + 1
+                    while j < len(tokens) and depth > 0:
+                        if tokens[j].type == B95abe433_TokenType.CONDITIONAL:
+                            if tokens[j].content == "endif":
+                                depth -= 1
+                            else:
+                                depth += 1
+                        j += 1
+                    i = j - 1  # -1 because we'll increment at the end of the loop
+            elif token.type == B95abe433_TokenType.LOOP_START:
+                loop_items = context.get(token.content, [])
+                loop_var_name = token.params[0]
+                
+                for item in loop_items:
+                    # Create a new context with the loop variable
+                    new_context = context.copy()
+                    new_context[loop_var_name] = item
+                    
+                    # Process the loop body
+                    inner_result, _ = self._process_tokens(tokens, new_context, i + 1, loop_var_name)
+                    result.append(inner_result)
+                
+                # Skip to matching endfor
+                depth = 1
+                j = i + 1
+                while j < len(tokens) and depth > 0:
+                    if tokens[j].type == B95abe433_TokenType.LOOP_START:
+                        depth += 1
+                    elif tokens[j].type == B95abe433_TokenType.LOOP_END:
+                        depth -= 1
+                    j += 1
+                i = j - 1  # -1 because we'll increment at the end of the loop
+            elif token.type == B95abe433_TokenType.LOOP_END:
+                return "".join(result), i + 1
+                
+            i += 1
+            
+        return "".join(result), i
+
+if __name__ == "__main__":
+    template = "Hello, {{name}}! {% if show_items %}Items: {% for item in items %}{{item}}{% if not loop_last %}, {% endif %}{% endfor %}{% endif %}"
+    engine = B95abe433Main()
+    result = engine.render(template, {"name": "World", "show_items": True, "items": ["A", "B", "C"]})
+    print(result)  # Output: Hello, World! Items: A, B, C
+
+# ===== module block end =====
