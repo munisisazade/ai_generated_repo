@@ -3894,3 +3894,120 @@ if __name__ == "__main__":
     print(f"Evaluation: {hand_type} (Score: {score})")
 
 # ===== module block end =====
+
+# ===== module block begin ===== 2025-09-03T00:07:13.478980Z =====
+from typing import Dict, List, Tuple, Optional, Union, Callable
+from enum import Enum
+import math
+import random
+from dataclasses import dataclass
+
+class Bce8c09dd_CardSuit(Enum):
+    """Enum representing the four standard playing card suits."""
+    HEARTS = "♥"
+    DIAMONDS = "♦"
+    CLUBS = "♣"
+    SPADES = "♠"
+
+class Bce8c09dd_CardRank(Enum):
+    """Enum representing standard playing card ranks."""
+    TWO = 2
+    THREE = 3
+    FOUR = 4
+    FIVE = 5
+    SIX = 6
+    SEVEN = 7
+    EIGHT = 8
+    NINE = 9
+    TEN = 10
+    JACK = 11
+    QUEEN = 12
+    KING = 13
+    ACE = 14
+
+@dataclass
+class Bce8c09dd_Card:
+    """Represents a standard playing card with a suit and rank."""
+    suit: Bce8c09dd_CardSuit
+    rank: Bce8c09dd_CardRank
+    
+    def __str__(self) -> str:
+        """Returns a string representation of the card."""
+        rank_symbols = {
+            Bce8c09dd_CardRank.JACK: "J",
+            Bce8c09dd_CardRank.QUEEN: "Q",
+            Bce8c09dd_CardRank.KING: "K",
+            Bce8c09dd_CardRank.ACE: "A"
+        }
+        rank_symbol = rank_symbols.get(self.rank, str(self.rank.value))
+        return f"{rank_symbol}{self.suit.value}"
+
+class Bce8c09ddMain:
+    """A poker hand evaluator that can create and score poker hands."""
+    
+    def __init__(self):
+        """Initialize the poker hand evaluator."""
+        self.deck = self._create_deck()
+    
+    def _create_deck(self) -> List[Bce8c09dd_Card]:
+        """Create a standard 52-card deck."""
+        return [Bce8c09dd_Card(suit, rank) 
+                for suit in Bce8c09dd_CardSuit 
+                for rank in Bce8c09dd_CardRank]
+    
+    def deal_hand(self, size: int = 5) -> List[Bce8c09dd_Card]:
+        """Deal a random hand of cards from the deck."""
+        if size > len(self.deck):
+            raise ValueError(f"Cannot deal {size} cards from a deck of {len(self.deck)}")
+        hand = random.sample(self.deck, size)
+        return hand
+    
+    def score_hand(self, hand: List[Bce8c09dd_Card]) -> Tuple[int, str]:
+        """
+        Score a poker hand and return a tuple of (score, description).
+        Higher scores are better hands.
+        """
+        if len(hand) != 5:
+            raise ValueError("Poker hand must contain exactly 5 cards")
+            
+        # Check for flush
+        is_flush = len(set(card.suit for card in hand)) == 1
+        
+        # Check for straight
+        ranks = sorted([card.rank.value for card in hand])
+        is_straight = (len(set(ranks)) == 5 and 
+                       max(ranks) - min(ranks) == 4)
+        
+        # Count rank frequencies
+        rank_counts = {}
+        for card in hand:
+            rank_counts[card.rank.value] = rank_counts.get(card.rank.value, 0) + 1
+        
+        # Determine hand type
+        if is_straight and is_flush:
+            return (8, "Straight Flush")
+        elif 4 in rank_counts.values():
+            return (7, "Four of a Kind")
+        elif 3 in rank_counts.values() and 2 in rank_counts.values():
+            return (6, "Full House")
+        elif is_flush:
+            return (5, "Flush")
+        elif is_straight:
+            return (4, "Straight")
+        elif 3 in rank_counts.values():
+            return (3, "Three of a Kind")
+        elif list(rank_counts.values()).count(2) == 2:
+            return (2, "Two Pair")
+        elif 2 in rank_counts.values():
+            return (1, "One Pair")
+        else:
+            return (0, "High Card")
+
+if __name__ == "__main__":
+    poker = Bce8c09ddMain()
+    hand = poker.deal_hand()
+    score, description = poker.score_hand(hand)
+    print(f"Hand: {' '.join(str(card) for card in hand)}")
+    print(f"Score: {score} - {description}")
+
+# ===== module block end =====
