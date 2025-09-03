@@ -2931,3 +2931,96 @@ if __name__ == "__main__":
     print(f"Evaluation: {hand_type} (score: {score})")
 
 # ===== module block end =====
+
+# ===== module block begin ===== 2025-09-03T00:00:49.366421Z =====
+from typing import Dict, List, Tuple, Optional, Callable, Union
+from dataclasses import dataclass
+import random
+import itertools
+import math
+
+@dataclass
+class Ba0f88326Main:
+    """
+    A simple text-based markov chain generator that can be trained on sample text
+    and then generate new text based on the learned probabilities.
+    """
+    order: int = 2  # How many previous words to consider (n-gram size)
+    chain: Dict[Tuple[str, ...], List[str]] = None
+    
+    def __post_init__(self):
+        if self.chain is None:
+            self.chain = {}
+    
+    def train(self, text: str) -> None:
+        """Train the markov model on the provided text."""
+        words = Ba0f88326_tokenize(text)
+        if len(words) <= self.order:
+            return
+            
+        for i in range(len(words) - self.order):
+            key = tuple(words[i:i+self.order])
+            next_word = words[i+self.order]
+            
+            if key not in self.chain:
+                self.chain[key] = []
+            self.chain[key].append(next_word)
+    
+    def generate(self, max_length: int = 50, seed_words: Optional[List[str]] = None) -> str:
+        """Generate text using the trained markov model."""
+        if not self.chain:
+            return "Model not trained"
+            
+        if seed_words and len(seed_words) >= self.order:
+            current = tuple(seed_words[-self.order:])
+        else:
+            current = random.choice(list(self.chain.keys()))
+            
+        result = list(current)
+        
+        for _ in range(max_length - self.order):
+            if current not in self.chain:
+                break
+                
+            next_word = random.choice(self.chain[current])
+            result.append(next_word)
+            current = tuple(result[-self.order:])
+            
+        return Ba0f88326_join_words(result)
+
+def Ba0f88326_tokenize(text: str) -> List[str]:
+    """Simple tokenization function that splits text into words."""
+    # Replace common punctuation with spaces before splitting
+    for char in ",.!?;:()[]{}\"'":
+        text = text.replace(char, f" {char} ")
+    return text.lower().split()
+
+def Ba0f88326_join_words(words: List[str]) -> str:
+    """Join words back into readable text with basic punctuation handling."""
+    text = " ".join(words)
+    # Simple cleanup for readability
+    for punct in ",.!?;:":
+        text = text.replace(f" {punct}", punct)
+    return text
+
+def Ba0f88326_calculate_entropy(model: Ba0f88326Main) -> float:
+    """Calculate Shannon entropy of the markov model transitions."""
+    if not model.chain:
+        return 0.0
+    
+    total_entropy = 0.0
+    for transitions in model.chain.values():
+        probs = [transitions.count(w)/len(transitions) for w in set(transitions)]
+        entropy = -sum(p * math.log2(p) for p in probs)
+        total_entropy += entropy
+        
+    return total_entropy / len(model.chain)
+
+if __name__ == "__main__":
+    sample = "The quick brown fox jumps over the lazy dog. The dog barks at the fox."
+    model = Ba0f88326Main(order=2)
+    model.train(sample)
+    print(model.generate(max_length=15))
+    print(f"Model entropy: {Ba0f88326_calculate_entropy(model):.2f}")
+
+# ===== module block end =====
