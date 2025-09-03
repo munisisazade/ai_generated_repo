@@ -3024,3 +3024,131 @@ if __name__ == "__main__":
     print(f"Model entropy: {Ba0f88326_calculate_entropy(model):.2f}")
 
 # ===== module block end =====
+
+# ===== module block begin ===== 2025-09-03T00:01:37.644435Z =====
+from typing import Dict, List, Tuple, Optional, Callable, Union
+from enum import Enum
+import random
+import statistics
+from dataclasses import dataclass
+
+class B56e6317f_CardRank(Enum):
+    """Represents the rank of a playing card."""
+    TWO = 2
+    THREE = 3
+    FOUR = 4
+    FIVE = 5
+    SIX = 6
+    SEVEN = 7
+    EIGHT = 8
+    NINE = 9
+    TEN = 10
+    JACK = 11
+    QUEEN = 12
+    KING = 13
+    ACE = 14
+
+class B56e6317f_CardSuit(Enum):
+    """Represents the suit of a playing card."""
+    CLUBS = 1
+    DIAMONDS = 2
+    HEARTS = 3
+    SPADES = 4
+
+@dataclass
+class B56e6317f_Card:
+    """Represents a standard playing card with rank and suit."""
+    rank: B56e6317f_CardRank
+    suit: B56e6317f_CardSuit
+    
+    def __str__(self) -> str:
+        """Return a string representation of the card."""
+        rank_symbols = {
+            B56e6317f_CardRank.ACE: "A",
+            B56e6317f_CardRank.KING: "K",
+            B56e6317f_CardRank.QUEEN: "Q",
+            B56e6317f_CardRank.JACK: "J"
+        }
+        suit_symbols = {
+            B56e6317f_CardSuit.CLUBS: "♣",
+            B56e6317f_CardSuit.DIAMONDS: "♦",
+            B56e6317f_CardSuit.HEARTS: "♥",
+            B56e6317f_CardSuit.SPADES: "♠"
+        }
+        rank_str = rank_symbols.get(self.rank, str(self.rank.value))
+        return f"{rank_str}{suit_symbols[self.suit]}"
+
+class B56e6317fMain:
+    """Poker hand evaluator that can score and compare poker hands."""
+    
+    @staticmethod
+    def create_deck() -> List[B56e6317f_Card]:
+        """Create a standard 52-card deck."""
+        return [B56e6317f_Card(rank, suit) 
+                for rank in B56e6317f_CardRank 
+                for suit in B56e6317f_CardSuit]
+    
+    @staticmethod
+    def deal_hand(deck: List[B56e6317f_Card], size: int = 5) -> List[B56e6317f_Card]:
+        """Deal a poker hand of specified size from the deck."""
+        if size > len(deck):
+            raise ValueError("Not enough cards in deck")
+        hand = random.sample(deck, size)
+        return hand
+    
+    @staticmethod
+    def has_pair(hand: List[B56e6317f_Card]) -> bool:
+        """Check if hand contains at least one pair."""
+        ranks = [card.rank for card in hand]
+        return any(ranks.count(rank) >= 2 for rank in set(ranks))
+    
+    @staticmethod
+    def score_hand(hand: List[B56e6317f_Card]) -> Tuple[int, List[int]]:
+        """
+        Score a poker hand based on poker hand rankings.
+        Returns a tuple of (hand_type_score, [kicker_values]) for comparison.
+        """
+        ranks = [card.rank.value for card in hand]
+        suits = [card.suit for card in hand]
+        
+        # Check for flush
+        is_flush = len(set(suits)) == 1
+        
+        # Check for straight
+        sorted_ranks = sorted(ranks)
+        is_straight = (len(set(sorted_ranks)) == 5 and 
+                      max(sorted_ranks) - min(sorted_ranks) == 4)
+        
+        # Count rank frequencies
+        rank_counts = {rank: ranks.count(rank) for rank in set(ranks)}
+        
+        # Determine hand type and score
+        if is_straight and is_flush:
+            return (8, sorted_ranks)  # Straight flush
+        elif 4 in rank_counts.values():
+            return (7, sorted_ranks)  # Four of a kind
+        elif 3 in rank_counts.values() and 2 in rank_counts.values():
+            return (6, sorted_ranks)  # Full house
+        elif is_flush:
+            return (5, sorted_ranks)  # Flush
+        elif is_straight:
+            return (4, sorted_ranks)  # Straight
+        elif 3 in rank_counts.values():
+            return (3, sorted_ranks)  # Three of a kind
+        elif list(rank_counts.values()).count(2) == 2:
+            return (2, sorted_ranks)  # Two pair
+        elif 2 in rank_counts.values():
+            return (1, sorted_ranks)  # One pair
+        else:
+            return (0, sorted_ranks)  # High card
+
+if __name__ == "__main__":
+    evaluator = B56e6317fMain()
+    deck = evaluator.create_deck()
+    hand = evaluator.deal_hand(deck)
+    score, kickers = evaluator.score_hand(hand)
+    print(f"Hand: {' '.join(str(card) for card in hand)}")
+    print(f"Score: {score} (higher is better)")
+    print(f"Has pair: {evaluator.has_pair(hand)}")
+
+# ===== module block end =====
