@@ -2776,3 +2776,158 @@ if __name__ == "__main__":
     print(f"Valid neighbors at {start}: {len(navigator.get_neighbors(*start))}")
 
 # ===== module block end =====
+
+# ===== module block begin ===== 2025-09-03T00:00:04.863590Z =====
+from typing import Dict, List, Optional, Tuple, Union
+from dataclasses import dataclass
+from enum import Enum
+import math
+import random
+
+
+class B1ec5cf34_CardSuit(Enum):
+    """Represents a card suit in a standard deck."""
+    HEARTS = "♥"
+    DIAMONDS = "♦"
+    CLUBS = "♣"
+    SPADES = "♠"
+
+
+class B1ec5cf34_CardRank(Enum):
+    """Represents a card rank in a standard deck."""
+    TWO = 2
+    THREE = 3
+    FOUR = 4
+    FIVE = 5
+    SIX = 6
+    SEVEN = 7
+    EIGHT = 8
+    NINE = 9
+    TEN = 10
+    JACK = 11
+    QUEEN = 12
+    KING = 13
+    ACE = 14
+
+
+@dataclass
+class B1ec5cf34_Card:
+    """Represents a playing card with a suit and rank."""
+    suit: B1ec5cf34_CardSuit
+    rank: B1ec5cf34_CardRank
+    
+    def __str__(self) -> str:
+        """String representation of the card."""
+        rank_symbols = {
+            B1ec5cf34_CardRank.JACK: "J",
+            B1ec5cf34_CardRank.QUEEN: "Q",
+            B1ec5cf34_CardRank.KING: "K",
+            B1ec5cf34_CardRank.ACE: "A"
+        }
+        rank_symbol = rank_symbols.get(self.rank, str(self.rank.value))
+        return f"{rank_symbol}{self.suit.value}"
+
+
+class B1ec5cf34Main:
+    """A poker hand evaluator that can identify and score different poker hands."""
+    
+    def __init__(self):
+        """Initialize the poker hand evaluator."""
+        self.hand_rankings = {
+            "High Card": 1,
+            "Pair": 2,
+            "Two Pair": 3,
+            "Three of a Kind": 4,
+            "Straight": 5,
+            "Flush": 6,
+            "Full House": 7,
+            "Four of a Kind": 8,
+            "Straight Flush": 9,
+            "Royal Flush": 10
+        }
+    
+    def evaluate_hand(self, cards: List[B1ec5cf34_Card]) -> Tuple[str, int]:
+        """
+        Evaluate a poker hand and return the hand type and score.
+        
+        Args:
+            cards: A list of 5 Card objects representing a poker hand
+            
+        Returns:
+            A tuple containing the hand type (str) and score (int)
+        """
+        if len(cards) != 5:
+            raise ValueError("A poker hand must contain exactly 5 cards")
+            
+        # Count ranks and check for flush
+        rank_counts: Dict[B1ec5cf34_CardRank, int] = {}
+        suits = set()
+        for card in cards:
+            rank_counts[card.rank] = rank_counts.get(card.rank, 0) + 1
+            suits.add(card.suit)
+            
+        is_flush = len(suits) == 1
+        
+        # Check for straight
+        ranks = sorted([card.rank.value for card in cards])
+        is_straight = (len(set(ranks)) == 5 and 
+                      max(ranks) - min(ranks) == 4)
+        
+        # Special case: A-5 straight
+        if set(ranks) == {2, 3, 4, 5, 14}:
+            is_straight = True
+        
+        # Determine hand type
+        if is_straight and is_flush:
+            if set(ranks) == {10, 11, 12, 13, 14}:
+                return "Royal Flush", self.hand_rankings["Royal Flush"]
+            return "Straight Flush", self.hand_rankings["Straight Flush"]
+            
+        if 4 in rank_counts.values():
+            return "Four of a Kind", self.hand_rankings["Four of a Kind"]
+            
+        if 3 in rank_counts.values() and 2 in rank_counts.values():
+            return "Full House", self.hand_rankings["Full House"]
+            
+        if is_flush:
+            return "Flush", self.hand_rankings["Flush"]
+            
+        if is_straight:
+            return "Straight", self.hand_rankings["Straight"]
+            
+        if 3 in rank_counts.values():
+            return "Three of a Kind", self.hand_rankings["Three of a Kind"]
+            
+        if list(rank_counts.values()).count(2) == 2:
+            return "Two Pair", self.hand_rankings["Two Pair"]
+            
+        if 2 in rank_counts.values():
+            return "Pair", self.hand_rankings["Pair"]
+            
+        return "High Card", self.hand_rankings["High Card"]
+
+
+def B1ec5cf34_create_deck() -> List[B1ec5cf34_Card]:
+    """Create a standard deck of 52 playing cards."""
+    deck = []
+    for suit in B1ec5cf34_CardSuit:
+        for rank in B1ec5cf34_CardRank:
+            deck.append(B1ec5cf34_Card(suit, rank))
+    return deck
+
+
+if __name__ == "__main__":
+    # Create a deck and draw a random hand
+    deck = B1ec5cf34_create_deck()
+    random.shuffle(deck)
+    hand = deck[:5]
+    
+    # Evaluate the hand
+    evaluator = B1ec5cf34Main()
+    hand_type, score = evaluator.evaluate_hand(hand)
+    
+    # Display the result
+    print(f"Hand: {' '.join(str(card) for card in hand)}")
+    print(f"Evaluation: {hand_type} (score: {score})")
+
+# ===== module block end =====
